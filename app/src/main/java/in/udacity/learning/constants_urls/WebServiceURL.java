@@ -5,11 +5,13 @@ package in.udacity.learning.constants_urls;
  */
 public class WebServiceURL {
 
-    public static String baseURLWeatherForcast = "http://api.openweathermap.org/data/2.5/forecast/daily?";
-    public static String QUERY = "q";
-    public static String UNIT = "units";
-    public static String DAYS = "cnt";
-    public static String MODE = "mode";
+    public static String baseURL = "https://api.themoviedb.org/3/discover/movie?";
+
+    public static  String API_KEY = "api_key";
+    public static  String QUERY = "query";
+    public static String YEAR = "year";
+    public static String SORT_BY = "sort_by";
+
     //public static String MODE = "mode";
 
 }

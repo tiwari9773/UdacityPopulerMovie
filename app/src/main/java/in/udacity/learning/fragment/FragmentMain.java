@@ -1,14 +1,19 @@
 package in.udacity.learning.fragment;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +30,7 @@ import in.udacity.learning.serviceutility.JSONParser;
 /**
  * Created by Lokesh on 13-09-2015.
  */
-public class FragmentMain extends Fragment implements OnMovieItemClickListener{
+public class FragmentMain extends Fragment implements OnMovieItemClickListener {
     private String TAG = getClass().getName();
     private MovieViewAdapter movieViewAdapter;
     private List<MovieItem> mItem = new ArrayList<>();
@@ -57,10 +62,40 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener{
 
     private void initialise(View view) {
         RecyclerView recycleView = (RecyclerView) view.findViewById(R.id.rv_movie_list);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 3);
-        recycleView.setLayoutManager(gridLayoutManager);
+        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        //GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 3);
+        // Hori
+        recycleView.setLayoutManager(linearLayoutManager);
 
-        movieViewAdapter = new MovieViewAdapter(mItem,this);
+
+        recycleView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+
+                Log.d(TAG, "***" + newState);
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                Log.i(TAG, dx + "---" + dy);
+
+                int in = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
+                View v = recyclerView.getChildAt(in + 2);
+                AnimatorSet animatorSet = new AnimatorSet();
+                ObjectAnimator scaleY = ObjectAnimator.ofFloat(v, "scaleY", 1f, 1.5f);
+                ObjectAnimator scaleX = ObjectAnimator.ofFloat(v, "scaleX", 1f, 1.5f);
+                scaleY.setInterpolator(new DecelerateInterpolator());
+                scaleX.setInterpolator(new DecelerateInterpolator());
+
+                animatorSet.playTogether(scaleY, scaleX);
+               // animatorSet.setDuration(700);
+                animatorSet.start();
+
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
+        movieViewAdapter = new MovieViewAdapter(mItem, this);
         recycleView.setAdapter(movieViewAdapter);
     }
 

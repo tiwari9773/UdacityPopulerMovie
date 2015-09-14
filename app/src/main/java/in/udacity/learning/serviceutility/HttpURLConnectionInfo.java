@@ -43,7 +43,7 @@ public class HttpURLConnectionInfo {
                     .appendQueryParameter(WebServiceURL.YEAR, mode)
                     .appendQueryParameter(WebServiceURL.SORT_BY, sort_by).build();
             URL url = new URL(builtUri.toString());
-
+//https://api.themoviedb.org/3/discover/movie?api_key=0fa829fc888260d7316187ab3e9dc115&year=discover&sort_by=popularity.desc
                 /* */
             if (AppConstant.DEVELOPER)
                 Log.v(TAG, builtUri.toString());

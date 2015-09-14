@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/accent"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:background="@color/accent">
 
     <ImageView
         android:id="@+id/iv_movie_poster"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:adjustViewBounds="true" />
 
     <TextView
-        android:textStyle="bold"
-        android:textColor="@color/white"
         android:id="@+id/tv_movie_name"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_height_list"
-        android:layout_gravity="bottom" />
-
+        android:layout_gravity="bottom"
+        android:textColor="@color/white"
+        android:textStyle="bold" />
 
 </FrameLayout>

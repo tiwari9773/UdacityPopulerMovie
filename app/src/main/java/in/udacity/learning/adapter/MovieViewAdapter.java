@@ -1,10 +1,14 @@
 package in.udacity.learning.adapter;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.media.Image;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -41,12 +45,26 @@ public class MovieViewAdapter extends RecyclerView.Adapter<MovieViewAdapter.Movi
     @Override
     public void onBindViewHolder(MovieHolder movieHolder, int i) {
         movieHolder.textView.setText(lsItem.get(i).getTitle());
+
+
         Glide.with(movieHolder.textView.getContext())
-                .load(WebServiceURL.baseURL+"/"+lsItem.get(i).getPoster_path())
+                .load(WebServiceURL.baseURLPoster+"/"+lsItem.get(i).getPoster_path())
                 .centerCrop()
                 .placeholder(R.mipmap.ic_launcher)
                 .crossFade()
                 .into(movieHolder.imageView);
+
+
+//        AnimatorSet animatorSet = new AnimatorSet();
+//        ObjectAnimator scaleY = ObjectAnimator.ofFloat(movieHolder.itemView, "scaleY", 1f, 1.5f);
+//        ObjectAnimator scaleX = ObjectAnimator.ofFloat(movieHolder.itemView, "scaleX", 1f, 1.5f);
+//        scaleY.setInterpolator(new DecelerateInterpolator());
+//        scaleX.setInterpolator(new DecelerateInterpolator());
+//
+//        animatorSet.playTogether(scaleY,scaleX);
+//        animatorSet.setDuration(700);
+//        animatorSet.start();
+
     }
 
     @Override
@@ -55,6 +73,8 @@ public class MovieViewAdapter extends RecyclerView.Adapter<MovieViewAdapter.Movi
     }
 
     class MovieHolder extends RecyclerView.ViewHolder {
+
+
         ImageView imageView;
         TextView textView;
 

@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,7 +23,7 @@ import in.udacity.learning.logger.L;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.network.NetWorkInfoUtility;
 import in.udacity.learning.populermovie.app.R;
-import in.udacity.learning.serviceutility.HttpURLConnectionInfo;
+import in.udacity.learning.serviceutility.HttpURLConnectionWebService;
 import in.udacity.learning.serviceutility.JSONParser;
 
 /**
@@ -112,7 +111,7 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
             String mode = params[0];
             String year = params[1];
             String sort_by = params[2];
-            String jsonString = new HttpURLConnectionInfo(mode, sort_by, Integer.parseInt(year)).getJSON(TAG);
+            String jsonString = new HttpURLConnectionWebService(mode, sort_by, Integer.parseInt(year)).getJSON(TAG);
             List<MovieItem> movieItems = JSONParser.parseMovieList(jsonString);
             return movieItems;
         }

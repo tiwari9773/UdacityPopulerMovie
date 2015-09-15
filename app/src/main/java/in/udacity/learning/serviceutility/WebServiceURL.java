@@ -1,4 +1,4 @@
-package in.udacity.learning.constants_urls;
+package in.udacity.learning.serviceutility;
 
 /**
  * Created by USER on 03-Sep-15.

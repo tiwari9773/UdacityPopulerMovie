@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import in.udacity.learning.keys.ResponceParsingKeys;
+import in.udacity.learning.keys.ResponseParsingKeys;
 import in.udacity.learning.model.MovieItem;
 
 /**
@@ -25,7 +25,7 @@ public class JSONParser {
 
         try {
             JSONObject jsonObject = new JSONObject(jSonString);
-            JSONArray jsonArray = jsonObject.getJSONArray(ResponceParsingKeys.MovieKeys.RESULTS);
+            JSONArray jsonArray = jsonObject.getJSONArray(ResponseParsingKeys.MovieKeys.RESULTS);
 
             //set Time
             Calendar dayTime = new GregorianCalendar();
@@ -35,8 +35,8 @@ public class JSONParser {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject origArray = jsonArray.getJSONObject(i);
 
-                String title = origArray.getString(ResponceParsingKeys.MovieKeys.TITLE);
-                String path = origArray.getString(ResponceParsingKeys.MovieKeys.POSTER_PATH);
+                String title = origArray.getString(ResponseParsingKeys.MovieKeys.TITLE);
+                String path = origArray.getString(ResponseParsingKeys.MovieKeys.POSTER_PATH);
 
                 MovieItem temp = new MovieItem(title,path);
                 lsMovie.add(temp);

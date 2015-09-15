@@ -1,4 +1,4 @@
-package in.udacity.learning.constants_urls;
+package in.udacity.learning.constants;
 
 /**
  * Created by Lokesh on 04-09-2015.

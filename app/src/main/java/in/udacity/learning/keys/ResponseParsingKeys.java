@@ -3,7 +3,7 @@ package in.udacity.learning.keys;
 /**
  * Created by Lokesh on 06-09-2015.
  */
-public interface ResponceParsingKeys {
+public interface ResponseParsingKeys {
 
     interface MovieKeys{
         String RESULTS = "results";

@@ -1,14 +1,9 @@
 package in.udacity.learning.adapter;
 
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.media.Image;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,7 +11,7 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 
-import in.udacity.learning.constants_urls.WebServiceURL;
+import in.udacity.learning.serviceutility.WebServiceURL;
 import in.udacity.learning.framework.OnMovieItemClickListener;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.populermovie.app.R;

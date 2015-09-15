@@ -11,8 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import in.udacity.learning.constants_urls.AppConstant;
-import in.udacity.learning.constants_urls.WebServiceURL;
+import in.udacity.learning.constants.AppConstant;
 import in.udacity.learning.keys.ApiKeys;
 import in.udacity.learning.logger.L;
 import in.udacity.learning.populermovie.app.MyApplication;
@@ -20,13 +19,13 @@ import in.udacity.learning.populermovie.app.MyApplication;
 /**
  * Created by Lokesh on 06-09-2015.
  */
-public class HttpURLConnectionInfo {
+public class HttpURLConnectionWebService {
 
     String mode = "discover";
     String sort_by = "popularity.desc";
     int year = 2015;
 
-    public HttpURLConnectionInfo(String mode, String sort_by, int year) {
+    public HttpURLConnectionWebService(String mode, String sort_by, int year) {
         this.mode = mode;
         this.sort_by = sort_by;
         this.year = year;

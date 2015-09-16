@@ -1,4 +1,4 @@
-package in.udacity.learning.serviceutility;
+package in.udacity.learning.web_service;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import in.udacity.learning.keys.ResponseParsingKeys;
 import in.udacity.learning.model.MovieItem;
 
 /**
@@ -19,13 +18,14 @@ import in.udacity.learning.model.MovieItem;
  */
 public class JSONParser {
 
+    // give the parsed result of movie list
     public static List<MovieItem> parseMovieList(String jSonString)
     {
         List<MovieItem> lsMovie = new ArrayList();
 
         try {
             JSONObject jsonObject = new JSONObject(jSonString);
-            JSONArray jsonArray = jsonObject.getJSONArray(ResponseParsingKeys.MovieKeys.RESULTS);
+            JSONArray jsonArray = jsonObject.getJSONArray(WebServiceParsingKeys.MovieKeys.RESULTS);
 
             //set Time
             Calendar dayTime = new GregorianCalendar();
@@ -35,8 +35,8 @@ public class JSONParser {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject origArray = jsonArray.getJSONObject(i);
 
-                String title = origArray.getString(ResponseParsingKeys.MovieKeys.TITLE);
-                String path = origArray.getString(ResponseParsingKeys.MovieKeys.POSTER_PATH);
+                String title = origArray.getString(WebServiceParsingKeys.MovieKeys.TITLE);
+                String path = origArray.getString(WebServiceParsingKeys.MovieKeys.POSTER_PATH);
 
                 MovieItem temp = new MovieItem(title,path);
                 lsMovie.add(temp);

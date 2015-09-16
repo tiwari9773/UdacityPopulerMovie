@@ -1,9 +1,9 @@
-package in.udacity.learning.keys;
+package in.udacity.learning.web_service;
 
 /**
  * Created by Lokesh on 06-09-2015.
  */
-public interface ResponseParsingKeys {
+public interface WebServiceParsingKeys {
 
     interface MovieKeys{
         String RESULTS = "results";

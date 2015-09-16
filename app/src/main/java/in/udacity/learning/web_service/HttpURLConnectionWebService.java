@@ -1,4 +1,4 @@
-package in.udacity.learning.serviceutility;
+package in.udacity.learning.web_service;
 
 import android.net.Uri;
 import android.util.Log;
@@ -11,7 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import in.udacity.learning.constants.AppConstant;
+import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.keys.ApiKeys;
 import in.udacity.learning.logger.L;
 import in.udacity.learning.populermovie.app.MyApplication;

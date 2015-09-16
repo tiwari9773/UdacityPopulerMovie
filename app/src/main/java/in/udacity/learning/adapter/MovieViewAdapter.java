@@ -11,7 +11,7 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 
-import in.udacity.learning.serviceutility.WebServiceURL;
+import in.udacity.learning.web_service.WebServiceURL;
 import in.udacity.learning.framework.OnMovieItemClickListener;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.populermovie.app.R;

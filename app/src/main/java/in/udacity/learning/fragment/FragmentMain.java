@@ -23,8 +23,8 @@ import in.udacity.learning.logger.L;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.network.NetWorkInfoUtility;
 import in.udacity.learning.populermovie.app.R;
-import in.udacity.learning.serviceutility.HttpURLConnectionWebService;
-import in.udacity.learning.serviceutility.JSONParser;
+import in.udacity.learning.web_service.HttpURLConnectionWebService;
+import in.udacity.learning.web_service.JSONParser;
 
 /**
  * Created by Lokesh on 13-09-2015.

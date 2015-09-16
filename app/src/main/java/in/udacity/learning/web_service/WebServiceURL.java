@@ -1,4 +1,4 @@
-package in.udacity.learning.serviceutility;
+package in.udacity.learning.web_service;
 
 /**
  * Created by USER on 03-Sep-15.

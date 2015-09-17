@@ -21,17 +21,16 @@ import in.udacity.learning.populermovie.app.MyApplication;
  */
 public class HttpURLConnectionWebService {
 
-    String mode = "discover";
-    String sort_by = "popularity.desc";
-    int year = 2015;
+    private String sort_by = "popularity.desc"; //default Value
+    private String primary_release_year = "2015";
 
-    public HttpURLConnectionWebService(String mode, String sort_by, int year) {
-        this.mode = mode;
+    public HttpURLConnectionWebService(String sort_by,String primary_release_year) {
         this.sort_by = sort_by;
-        this.year = year;
+        this.primary_release_year = primary_release_year;
     }
 
-    public String getJSON(String TAG) {
+    /* Tag is only for marking which class is calling this method*/
+    public String getMovieJSON(String TAG) {
         HttpURLConnection httpURLConnection = null;
         BufferedReader bufferedReader = null;
          /* Take an URL Object*/
@@ -39,10 +38,10 @@ public class HttpURLConnectionWebService {
 
             Uri builtUri = Uri.parse(WebServiceURL.baseURL).buildUpon()
                     .appendQueryParameter(WebServiceURL.API_KEY, ApiKeys.movie_api_keys)
-                    .appendQueryParameter(WebServiceURL.YEAR, mode)
+                    .appendQueryParameter(WebServiceURL.PRIMARY_RELEASE_YEAR, primary_release_year)
                     .appendQueryParameter(WebServiceURL.SORT_BY, sort_by).build();
             URL url = new URL(builtUri.toString());
-//https://api.themoviedb.org/3/discover/movie?api_key=0fa829fc888260d7316187ab3e9dc115&year=discover&sort_by=popularity.desc
+
                 /* */
             if (AppConstant.DEVELOPER)
                 Log.v(TAG, builtUri.toString());
@@ -70,7 +69,7 @@ public class HttpURLConnectionWebService {
 
             return stringBuffer.toString();
         } catch (MalformedURLException e) {
-            L.lToast(MyApplication.getContext(), e.toString());
+            L.lToast(MyApplication.getInstance().getContext(), e.toString());
             //e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -82,7 +81,7 @@ public class HttpURLConnectionWebService {
                 try {
                     bufferedReader.close();
                 } catch (final Exception e) {
-                    L.lToast(MyApplication.getContext(), e.toString());
+                    L.lToast(MyApplication.getInstance().getContext(), e.toString());
                 }
         }
         return null;

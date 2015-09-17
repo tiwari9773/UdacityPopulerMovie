@@ -19,10 +19,11 @@ import in.udacity.learning.populermovie.app.R;
 /**
  * Created by Lokesh on 14-09-2015.
  */
-public class MovieViewAdapter extends RecyclerView.Adapter<MovieViewAdapter.MovieHolder> {
+public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<MovieItem> lsItem;
     private OnMovieItemClickListener onMovieItemClickListener;
+    private final int EMPTY_VIEW = -1;
 
     public MovieViewAdapter(List<MovieItem> lsItem, OnMovieItemClickListener onMovieItemClickListener) {
         this.lsItem = lsItem;
@@ -30,25 +31,35 @@ public class MovieViewAdapter extends RecyclerView.Adapter<MovieViewAdapter.Movi
     }
 
     @Override
-    public MovieHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_movie_list_main, viewGroup, false);
-        MovieHolder movieHolder = new MovieHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
 
-        return movieHolder;
+        View view;
+        if (viewType == EMPTY_VIEW) {
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.empty_view, viewGroup, false);
+            EmptyViewHolder evh = new EmptyViewHolder(view);
+            return evh;
+
+        } else {
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_movie_list_main, viewGroup, false);
+            MovieHolder movieHolder = new MovieHolder(view);
+            return movieHolder;
+        }
     }
 
     @Override
-    public void onBindViewHolder(MovieHolder movieHolder, int i) {
-        movieHolder.textView.setText(lsItem.get(i).getTitle());
-
-
-        Glide.with(movieHolder.textView.getContext())
-                .load(WebServiceURL.baseURLPoster+"/"+lsItem.get(i).getPoster_path())
-                .centerCrop()
-                .placeholder(R.mipmap.ic_launcher)
-                .crossFade()
-                .into(movieHolder.imageView);
-
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int i) {
+        if (holder instanceof MovieHolder) {
+            MovieHolder movieHolder = (MovieHolder) holder;
+            movieHolder.tvMovieName.setText(lsItem.get(i).getTitle());
+            movieHolder.tvPopularity.setText("Popularity = " + lsItem.get(i).getPopularity());
+            movieHolder.tvVoting.setText("Average Vote = " + lsItem.get(i).getVote_average());
+            Glide.with(movieHolder.tvMovieName.getContext())
+                    .load(WebServiceURL.baseURLThumbnail + "/" + lsItem.get(i).getPoster_path())
+                    .centerCrop()
+                    .placeholder(R.mipmap.ic_launcher)
+                    .crossFade()
+                    .into(movieHolder.imageView);
+        }
 
 //        AnimatorSet animatorSet = new AnimatorSet();
 //        ObjectAnimator scaleY = ObjectAnimator.ofFloat(movieHolder.itemView, "scaleY", 1f, 1.5f);
@@ -64,25 +75,52 @@ public class MovieViewAdapter extends RecyclerView.Adapter<MovieViewAdapter.Movi
 
     @Override
     public int getItemCount() {
-        return lsItem.size();
+        return lsItem.size() == 0 ? 1 : lsItem.size();
     }
 
-    class MovieHolder extends RecyclerView.ViewHolder {
+    @Override
+    public int getItemViewType(int position) {
+        if (lsItem.size() == 0)
+            return EMPTY_VIEW;
 
-
-        ImageView imageView;
-        TextView textView;
-
-        public MovieHolder(View itemView) {
-            super(itemView);
-
-            imageView = (ImageView) itemView.findViewById(R.id.iv_movie_poster);
-            textView = (TextView) itemView.findViewById(R.id.tv_movie_name);
-        }
+        return super.getItemViewType(position);
     }
 
     public void setLsItem(List<MovieItem> lsItem) {
         this.lsItem = lsItem;
     }
+
+    class MovieHolder extends RecyclerView.ViewHolder {
+
+        ImageView imageView;
+        TextView tvMovieName;
+        TextView tvPopularity;
+        TextView tvVoting;
+
+
+        public MovieHolder(View itemView) {
+            super(itemView);
+
+            imageView = (ImageView) itemView.findViewById(R.id.iv_movie_thumbnail);
+            tvMovieName = (TextView) itemView.findViewById(R.id.tv_movie_name);
+            tvPopularity = (TextView) itemView.findViewById(R.id.tv_popularity);
+            tvVoting = (TextView) itemView.findViewById(R.id.tv_vote);
+
+            // What would be best way for Recycle Click Listener
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onMovieItemClickListener.onClickMovieThumbnail(imageView, getLayoutPosition());
+                }
+            });
+        }
+    }
+
+    class EmptyViewHolder extends RecyclerView.ViewHolder {
+        public EmptyViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
+
 
 }

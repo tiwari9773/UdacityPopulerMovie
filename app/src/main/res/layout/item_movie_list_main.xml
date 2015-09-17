@@ -1,21 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/accent">
+    android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/iv_movie_poster"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:transitionName="@string/transition_thumbnail_to_poster"
+        android:id="@+id/iv_movie_thumbnail"
+        android:layout_width="@dimen/movie_thumbnail_dimen"
+        android:layout_height="@dimen/movie_thumbnail_dimen"
         android:adjustViewBounds="true" />
 
-    <TextView
-        android:id="@+id/tv_movie_name"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/default_height_list"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:textColor="@color/white"
-        android:textStyle="bold" />
+        android:background="@color/half_transparent_black"
+        android:orientation="vertical">
+
+        <TextView
+            android:lines="2"
+            android:id="@+id/tv_movie_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@color/half_transparent_black"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_popularity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_padding"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_vote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
+    </LinearLayout>
+
 
 </FrameLayout>

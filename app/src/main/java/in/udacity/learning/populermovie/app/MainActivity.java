@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.frag_container, new FragmentMain()).commit();
         } else {
-
             Log.e(TAG, "Test");
         }
 

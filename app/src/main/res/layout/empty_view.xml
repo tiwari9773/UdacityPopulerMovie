@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tv_empty_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/default_padding"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:text="Loading.."
+    android:textSize="20sp"
+    android:textColor="@color/gray"
+    android:textStyle="bold" />

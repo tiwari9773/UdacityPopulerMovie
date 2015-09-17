@@ -1,30 +1,37 @@
 package in.udacity.learning.model;
 
+import android.graphics.drawable.Drawable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Lokesh on 14-09-2015.
  */
-public class MovieItem {
+public class MovieItem implements Parcelable {
 
-    private String page="page";
-    private String adult="adult";
-    private String backdrop_path="backdrop_path";
-    private String genre_ids="genre_ids";
-    private String id="id";
-    private String original_language="original_language";
-    private String original_title="original_title";
-    private String overview="overview";
-    private String release_date="release_date";
-    private String poster_path="poster_path";
-    private String title="title";
-    private String video="video";
-    private String vote_average="vote_average";
-    private String vote_count="vote_count";
-    private String total_pages="total_pages";
-    private String total_results="total_results";
+    private String popularity = "popularity";
+    private String page = "page";
+    private String adult = "adult";
+    private String backdrop_path = "backdrop_path";
+    private String genre_ids = "genre_ids";
+    private String id = "id";
+    private String original_language = "original_language";
+    private String original_title = "original_title";
+    private String overview = "overview";
+    private String release_date = "release_date";
+    private String poster_path = "poster_path";
+    private String title = "title";
+    private String video = "video";
+    private String vote_average = "vote_average";
+    private String vote_count = "vote_count";
+    private String total_pages = "total_pages";
+    private String total_results = "total_results";
 
-    public MovieItem(String title, String poster_path) {
+    public MovieItem(String title, String poster_path, String popularity, String vote_avarge) {
         this.title = title;
         this.poster_path = poster_path;
+        this.popularity = popularity;
+        this.vote_average = vote_avarge;
     }
 
     public String getPage() {
@@ -138,4 +145,73 @@ public class MovieItem {
     public void setTotal_results(String total_results) {
         this.total_results = total_results;
     }
+
+
+    public String getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(String popularity) {
+        this.popularity = popularity;
+    }
+
+    protected MovieItem(Parcel in) {
+        popularity = in.readString();
+        page = in.readString();
+        adult = in.readString();
+        backdrop_path = in.readString();
+        genre_ids = in.readString();
+        id = in.readString();
+        original_language = in.readString();
+        original_title = in.readString();
+        overview = in.readString();
+        release_date = in.readString();
+        poster_path = in.readString();
+        title = in.readString();
+        video = in.readString();
+        vote_average = in.readString();
+        vote_count = in.readString();
+        total_pages = in.readString();
+        total_results = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(popularity);
+        dest.writeString(page);
+        dest.writeString(adult);
+        dest.writeString(backdrop_path);
+        dest.writeString(genre_ids);
+        dest.writeString(id);
+        dest.writeString(original_language);
+        dest.writeString(original_title);
+        dest.writeString(overview);
+        dest.writeString(release_date);
+        dest.writeString(poster_path);
+        dest.writeString(title);
+        dest.writeString(video);
+        dest.writeString(vote_average);
+        dest.writeString(vote_count);
+        dest.writeString(total_pages);
+        dest.writeString(total_results);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<MovieItem> CREATOR = new Parcelable.Creator<MovieItem>() {
+        @Override
+        public MovieItem createFromParcel(Parcel in) {
+            return new MovieItem(in);
+        }
+
+        @Override
+        public MovieItem[] newArray(int size) {
+            return new MovieItem[size];
+        }
+    };
 }

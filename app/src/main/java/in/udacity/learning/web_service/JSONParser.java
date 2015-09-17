@@ -19,8 +19,7 @@ import in.udacity.learning.model.MovieItem;
 public class JSONParser {
 
     // give the parsed result of movie list
-    public static List<MovieItem> parseMovieList(String jSonString)
-    {
+    public static List<MovieItem> parseMovieList(String jSonString) {
         List<MovieItem> lsMovie = new ArrayList();
 
         try {
@@ -29,7 +28,7 @@ public class JSONParser {
 
             //set Time
             Calendar dayTime = new GregorianCalendar();
-            Date date =  new Date();
+            Date date = new Date();
             dayTime.setTime(date);
 
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -37,8 +36,13 @@ public class JSONParser {
 
                 String title = origArray.getString(WebServiceParsingKeys.MovieKeys.TITLE);
                 String path = origArray.getString(WebServiceParsingKeys.MovieKeys.POSTER_PATH);
+                String popularity = origArray.getString(WebServiceParsingKeys.MovieKeys.POPULARITY);
+                String vote_avarage = origArray.getString(WebServiceParsingKeys.MovieKeys.VOTE_AVERAGE);
 
-                MovieItem temp = new MovieItem(title,path);
+                MovieItem temp = new MovieItem(title, path, popularity, vote_avarage);
+
+                temp.setOverview(origArray.getString(WebServiceParsingKeys.MovieKeys.OVERVIEW));
+                temp.setRelease_date(origArray.getString(WebServiceParsingKeys.MovieKeys.RELEASE_DATE));
                 lsMovie.add(temp);
             }
 
@@ -51,7 +55,7 @@ public class JSONParser {
     /* The date/time conversion code is going to be moved outside the asynctask later,
             * so for convenience we're breaking it out into its own method now.
             */
-    private static String getReadableDateString(long time){
+    private static String getReadableDateString(long time) {
         // Because the API returns a unix timestamp (measured in seconds),
         // it must be converted to milliseconds in order to be converted to valid date.
         SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");

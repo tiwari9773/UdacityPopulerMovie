@@ -20,7 +20,7 @@ public class MyApplication extends Application {
         return mInstance;
     }
 
-    public static Context getContext() {
+    public Context getContext() {
         if (mInstance == null)
             mInstance = new MyApplication();
         return mInstance.getApplicationContext();

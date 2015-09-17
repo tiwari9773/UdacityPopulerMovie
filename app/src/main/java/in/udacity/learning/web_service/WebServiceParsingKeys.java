@@ -19,6 +19,7 @@ public interface WebServiceParsingKeys {
         String POSTER_PATH="poster_path";
         String TITLE="title";
         String VIDEO="video";
+        String POPULARITY = "popularity";
         String VOTE_AVERAGE="vote_average";
         String VOTE_COUNT="vote_count";
         String TOTAL_PAGES="total_pages";

@@ -7,4 +7,7 @@
     <dimen name="default_height_list">50dp</dimen>
     <dimen name="default_padding">8dp</dimen>
 
+    <dimen name="movie_thumbnail_dimen">200dp</dimen>
+    <dimen name="movie_poster_height">250dp</dimen>
+
 </resources>

@@ -7,8 +7,8 @@ you can short the movie by their popularity and rating b user
 
 Screenshot
 ------------------------
-![Screenshot](/Screenshot_video/device-home.png "Sample demo of project")
-![Demo](/Screenshot_video/screen.gif "Sample demo of project")
+![Screenshot](/screenshot_gif_demo/device-home.png "Sample demo of project")
+![Demo](/screenshot_gif_demo/screen.gif "Sample demo of project")
 
 UPCOMING:
 ------------------------

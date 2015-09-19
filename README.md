@@ -5,7 +5,7 @@ Project to show current yeat release of movie with
 themoviedb.org/documentation/api API
 you can short the movie by their popularity and rating b user
 
-![Screenshot](/Screenshot_video/device-2015-09-19-150545.png "Sample demo of project")
+![Screenshot](/screenshot_video/device-home.png "Sample demo of project")
 ![Demo](/Screenshot_video/screen.mp4 "Sample demo of project")
 
 UPCOMING:

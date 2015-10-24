@@ -86,8 +86,12 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return super.getItemViewType(position);
     }
 
+    public void resetList() {
+        this.lsItem.clear();
+    }
+
     public void setLsItem(List<MovieItem> lsItem) {
-        this.lsItem = lsItem;
+        this.lsItem.addAll(lsItem);
     }
 
     class MovieHolder extends RecyclerView.ViewHolder {

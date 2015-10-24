@@ -29,7 +29,7 @@ public abstract class RecycleEndlessScrollListener extends RecyclerView.OnScroll
     private int currentPage = 1;
 
     // Set Total no of pages requred to be loaded
-    private int maxPages = 1;
+    private int maxPages = 3;
 
     public int getMaxPages() {
         return maxPages;
@@ -62,16 +62,18 @@ public abstract class RecycleEndlessScrollListener extends RecyclerView.OnScroll
             firstVisibleItemPosition = gridLayoutManager.findFirstVisibleItemPosition();
         }
 
+        if (currentPage < getMaxPages()) {
         /* Now total is increased so we can reset flag*/
-        if (isLoading && firstVisibleItemPosition + totalVisibleItem + visibleThreshold < totalItemCount) {
-            isLoading = false;
-        }
+            if (isLoading && firstVisibleItemPosition + totalVisibleItem + visibleThreshold < totalItemCount) {
+                isLoading = false;
+            }
 
          /* Now total is less so we can demand for load*/
-        if (!isLoading && firstVisibleItemPosition + totalVisibleItem + visibleThreshold > totalItemCount) {
-            currentPage++;
-            isLoading = true;
-            onLoadMore(currentPage);
+            if (!isLoading && firstVisibleItemPosition + totalVisibleItem + visibleThreshold > totalItemCount) {
+                currentPage++;
+                isLoading = true;
+                onLoadMore(currentPage);
+            }
         }
     }
 

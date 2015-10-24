@@ -24,6 +24,9 @@ public class JSONParser {
 
         try {
             JSONObject jsonObject = new JSONObject(jSonString);
+            String total_pages = jsonObject.getString(WebServiceParsingKeys.MovieKeys.TOTAL_PAGES);
+            String total_result = jsonObject.getString(WebServiceParsingKeys.MovieKeys.TOTAL_RESULTS);
+
             JSONArray jsonArray = jsonObject.getJSONArray(WebServiceParsingKeys.MovieKeys.RESULTS);
 
             //set Time
@@ -40,6 +43,8 @@ public class JSONParser {
                 String vote_avarage = origArray.getString(WebServiceParsingKeys.MovieKeys.VOTE_AVERAGE);
 
                 MovieItem temp = new MovieItem(title, path, popularity, vote_avarage);
+                temp.setTotal_pages(total_pages);
+                temp.setTotal_results(total_result);
 
                 temp.setOverview(origArray.getString(WebServiceParsingKeys.MovieKeys.OVERVIEW));
                 temp.setRelease_date(origArray.getString(WebServiceParsingKeys.MovieKeys.RELEASE_DATE));

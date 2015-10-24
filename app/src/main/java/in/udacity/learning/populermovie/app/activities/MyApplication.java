@@ -1,4 +1,4 @@
-package in.udacity.learning.populermovie.app;
+package in.udacity.learning.populermovie.app.activities;
 
 import android.app.Application;
 import android.content.Context;

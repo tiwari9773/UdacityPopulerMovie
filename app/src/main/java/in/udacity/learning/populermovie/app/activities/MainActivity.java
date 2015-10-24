@@ -1,11 +1,12 @@
-package in.udacity.learning.populermovie.app;
+package in.udacity.learning.populermovie.app.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
-import in.udacity.learning.fragment.FragmentMain;
+import in.udacity.learning.populermovie.app.fragment.FragmentMain;
+import in.udacity.learning.populermovie.app.R;
 
 public class MainActivity extends AppCompatActivity {
 

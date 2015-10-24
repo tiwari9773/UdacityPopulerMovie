@@ -17,6 +17,7 @@ public class WebServiceURL {
     public static String API_KEY = "api_key";
     public static String YEAR = "year";
     public static String SORT_BY = "sort_by";
+    public static String PAGES = "page";
 
     public static String PRIMARY_RELEASE_YEAR = "primary_release_year";
     public static String PRIMARY_RELEASE_DATE_GTE = "primary_release_date.gte";

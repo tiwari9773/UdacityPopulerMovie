@@ -1,7 +1,5 @@
-package in.udacity.learning.fragment;
+package in.udacity.learning.populermovie.app.fragment;
 
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.ActivityOptions;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -9,10 +7,10 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,19 +19,21 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import in.udacity.learning.adapter.MovieViewAdapter;
 import in.udacity.learning.framework.OnMovieItemClickListener;
+import in.udacity.learning.listener.RecycleEndlessScrollListener;
 import in.udacity.learning.logger.L;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.network.NetWorkInfoUtility;
-import in.udacity.learning.populermovie.app.MainActivity;
-import in.udacity.learning.populermovie.app.MovieDetailActivity;
+import in.udacity.learning.populermovie.app.activities.MovieDetailActivity;
 import in.udacity.learning.populermovie.app.R;
 import in.udacity.learning.web_service.HttpURLConnectionWebService;
 import in.udacity.learning.web_service.JSONParser;
@@ -51,7 +51,13 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
     private String sort_rating = "vote_average.desc";
 
     private ProgressDialog dialog;
-public static Drawable drawable;
+    public static Drawable drawable;
+
+    // To reduce Overhead of continues toast to given delay by Timer
+    private boolean isShowToast = true;
+
+    // Timere which control toast display
+    private Timer mTimer;
 
     public FragmentMain() {
         setHasOptionsMenu(true);
@@ -83,6 +89,16 @@ public static Drawable drawable;
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         initialise(view);
 
+        // Timer which control over flooded toast message
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                isShowToast = true;
+            }
+        }, 1000, 500);
+
         return view;
     }
 
@@ -95,9 +111,44 @@ public static Drawable drawable;
             updateMovieList(sort_populer);
     }
 
-    private void updateMovieList(String sortOrder) {
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (mTimer != null)
+            mTimer.cancel();
+    }
+
+    private void initialise(View view) {
+
+        RecyclerView recycleView = (RecyclerView) view.findViewById(R.id.rv_movie_list);
+        //final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        final GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
+        recycleView.setLayoutManager(layoutManager);
+
+        movieViewAdapter = new MovieViewAdapter(mItem, this);
+        recycleView.setAdapter(movieViewAdapter);
+
+        RecycleEndlessScrollListener recycleEndlessScrollListener = new RecycleEndlessScrollListener() {
+            @Override
+            public void onLoadMore(int current_page) {
+                updateMovieList(sort_populer, current_page);
+            }
+        };
+        recycleEndlessScrollListener.setMaxPages(10);
+        /*On Scroll Listener*/
+        recycleView.setOnScrollListener(recycleEndlessScrollListener);
+    }
+
+    private void updateMovieList(String sort_order) {
+        /* By default considering first page*/
+        int current_page = 1;
+        updateMovieList(sort_order, current_page);
+    }
+
+    private void updateMovieList(String sortOrder, int current_page) {
         //
-        String param[] = new String[]{sortOrder, "2015"};
+        String param[] = new String[]{sortOrder, "2015", String.valueOf(current_page)};
 
         if (new NetWorkInfoUtility().isNetWorkAvailableNow(getContext())) {
             new FetchMovieList().execute(param);
@@ -106,15 +157,6 @@ public static Drawable drawable;
         }
     }
 
-    private void initialise(View view) {
-
-        RecyclerView recycleView = (RecyclerView) view.findViewById(R.id.rv_movie_list);
-        //final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
-        recycleView.setLayoutManager(layoutManager);
-        movieViewAdapter = new MovieViewAdapter(mItem, this);
-        recycleView.setAdapter(movieViewAdapter);
-    }
 
     @Override
     public void onClickMovieThumbnail(View view, int position) {
@@ -151,6 +193,7 @@ public static Drawable drawable;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+
             progressLoading();
         }
 
@@ -158,8 +201,9 @@ public static Drawable drawable;
         protected List<MovieItem> doInBackground(String... params) {
             String sort_by = params[0];
             String realese_year = params[1];
+            String pages = params[2];
 
-            String jsonString = new HttpURLConnectionWebService(sort_by, realese_year).getMovieJSON(TAG);
+            String jsonString = new HttpURLConnectionWebService(sort_by, realese_year, pages).getMovieJSON(TAG);
             if (jsonString != null) {
                 List<MovieItem> movieItems = JSONParser.parseMovieList(jsonString);
                 return movieItems;
@@ -171,18 +215,19 @@ public static Drawable drawable;
         protected void onPostExecute(List<MovieItem> movieItems) {
             super.onPostExecute(movieItems);
             if (movieItems != null)
-                populateList(movieItems);
+                mItem.addAll(movieItems);
 
-            if (dialog != null)
+            if (mItem != null)
+                populateList(mItem);
+
+            if (dialog != null && dialog.isShowing())
                 dialog.dismiss();
         }
     }
 
     private void populateList(List<MovieItem> movieItems) {
-        mItem = movieItems;
         movieViewAdapter.setLsItem(movieItems);
         movieViewAdapter.notifyDataSetChanged();
     }
-
 
 }

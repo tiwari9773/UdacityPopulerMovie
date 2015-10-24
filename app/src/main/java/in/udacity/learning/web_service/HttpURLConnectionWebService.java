@@ -14,7 +14,7 @@ import java.net.URL;
 import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.keys.ApiKeys;
 import in.udacity.learning.logger.L;
-import in.udacity.learning.populermovie.app.MyApplication;
+import in.udacity.learning.populermovie.app.activities.MyApplication;
 
 /**
  * Created by Lokesh on 06-09-2015.
@@ -23,10 +23,12 @@ public class HttpURLConnectionWebService {
 
     private String sort_by = "popularity.desc"; //default Value
     private String primary_release_year = "2015";
+    private String requestedPage = "1";
 
-    public HttpURLConnectionWebService(String sort_by,String primary_release_year) {
+    public HttpURLConnectionWebService(String sort_by,String primary_release_year,String requestedPage) {
         this.sort_by = sort_by;
         this.primary_release_year = primary_release_year;
+        this.requestedPage = requestedPage;
     }
 
     /* Tag is only for marking which class is calling this method*/
@@ -39,7 +41,8 @@ public class HttpURLConnectionWebService {
             Uri builtUri = Uri.parse(WebServiceURL.baseURL).buildUpon()
                     .appendQueryParameter(WebServiceURL.API_KEY, ApiKeys.movie_api_keys)
                     .appendQueryParameter(WebServiceURL.PRIMARY_RELEASE_YEAR, primary_release_year)
-                    .appendQueryParameter(WebServiceURL.SORT_BY, sort_by).build();
+                    .appendQueryParameter(WebServiceURL.SORT_BY, sort_by)
+                    .appendQueryParameter(WebServiceURL.PAGES, requestedPage).build();
             URL url = new URL(builtUri.toString());
 
                 /* */

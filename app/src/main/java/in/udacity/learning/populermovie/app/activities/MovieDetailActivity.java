@@ -1,4 +1,4 @@
-package in.udacity.learning.populermovie.app;
+package in.udacity.learning.populermovie.app.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,8 +9,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
-import in.udacity.learning.fragment.FragmentMain;
+import in.udacity.learning.populermovie.app.fragment.FragmentMain;
 import in.udacity.learning.model.MovieItem;
+import in.udacity.learning.populermovie.app.R;
 import in.udacity.learning.web_service.WebServiceURL;
 
 /**

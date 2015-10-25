@@ -21,6 +21,12 @@
         <activity
             android:name=".activities.MovieDetailActivity"
             android:parentActivityName=".activities.MainActivity" />
+
+        <provider
+            android:authorities="@string/content_authority"
+            android:name="in.udacity.learning.dbhelper.MovieProvider"
+            android:exported="false"
+            android:syncable="true" />
     </application>
 
 

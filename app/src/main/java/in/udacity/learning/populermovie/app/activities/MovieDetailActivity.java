@@ -20,6 +20,8 @@ import in.udacity.learning.web_service.WebServiceURL;
 public class MovieDetailActivity extends AppCompatActivity {
 
     private final String TAG = getClass().getName();
+
+    /* Test*/
     private Toolbar mToolbar;
 
     @Override

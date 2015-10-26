@@ -1,14 +1,21 @@
 package in.udacity.learning.populermovie.app.activities;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import in.udacity.learning.dbhelper.MovieContract;
+import in.udacity.learning.dbhelper.MovieProvider;
 import in.udacity.learning.populermovie.app.fragment.FragmentMain;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.populermovie.app.R;
@@ -38,7 +45,10 @@ public class MovieDetailActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        MovieItem item = getIntent().getParcelableExtra(Intent.EXTRA_TEXT);
+        final MovieItem item = getIntent().getParcelableExtra(Intent.EXTRA_TEXT);
+
+        /*Setup title of Image*/
+        setTitle(item.getTitle());
 
         ImageView ivBanner = (ImageView) findViewById(R.id.iv_movie_poster);
         ivBanner.setImageDrawable(FragmentMain.drawable);
@@ -62,6 +72,27 @@ public class MovieDetailActivity extends AppCompatActivity {
                 .placeholder(FragmentMain.drawable)
                 .crossFade()
                 .into(ivBanner);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ContentValues cv = new ContentValues();
+                cv.put(MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID, item.getId());
+                cv.put(MovieContract.FavouriteMovie.COL_RELEASE_DATE, 1234);
+                cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_LANGUAGE, item.getOriginal_language());
+                cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_TITLE, item.getOriginal_title());
+                cv.put(MovieContract.FavouriteMovie.COL_OVERVIEW, item.getOverview());
+                cv.put(MovieContract.FavouriteMovie.COL_POSTER_PATH, item.getPoster_path());
+                cv.put(MovieContract.FavouriteMovie.COL_TITLE, item.getTitle());
+                cv.put(MovieContract.FavouriteMovie.COL_POPULARITY, item.getPopularity());
+                cv.put(MovieContract.FavouriteMovie.COL_VOTE_AVERAGE, item.getVote_average());
+                cv.put(MovieContract.FavouriteMovie.COL_VOTE_COUNT, item.getVote_count());
+
+                Uri uri = getContentResolver().insert(MovieContract.FavouriteMovie.CONTENT_URI,cv);
+                Log.d(TAG, "onClick " + uri.toString()+ " Values "+cv.toString());
+            }
+        });
 
     }
 }

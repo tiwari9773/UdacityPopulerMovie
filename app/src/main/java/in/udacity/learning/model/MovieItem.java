@@ -15,6 +15,15 @@ public class MovieItem implements Parcelable {
     private String backdrop_path = "backdrop_path";
     private String genre_ids = "genre_ids";
     private String id = "id";
+
+    public String getOriginal_language() {
+        return original_language;
+    }
+
+    public void setOriginal_language(String original_language) {
+        this.original_language = original_language;
+    }
+
     private String original_language = "original_language";
     private String original_title = "original_title";
     private String overview = "overview";

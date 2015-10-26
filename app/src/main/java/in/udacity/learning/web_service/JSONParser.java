@@ -38,13 +38,21 @@ public class JSONParser {
                 JSONObject origArray = jsonArray.getJSONObject(i);
 
                 String title = origArray.getString(WebServiceParsingKeys.MovieKeys.TITLE);
+                String original_title = origArray.getString(WebServiceParsingKeys.MovieKeys.ORIGINAL_TITLE);
+                String original_language = origArray.getString(WebServiceParsingKeys.MovieKeys.ORIGINAL_LANGUAGE);
+                String serverId = origArray.getString(WebServiceParsingKeys.MovieKeys.ID);
                 String path = origArray.getString(WebServiceParsingKeys.MovieKeys.POSTER_PATH);
                 String popularity = origArray.getString(WebServiceParsingKeys.MovieKeys.POPULARITY);
                 String vote_avarage = origArray.getString(WebServiceParsingKeys.MovieKeys.VOTE_AVERAGE);
+                String voteCount = origArray.getString(WebServiceParsingKeys.MovieKeys.VOTE_COUNT);
 
                 MovieItem temp = new MovieItem(title, path, popularity, vote_avarage);
                 temp.setTotal_pages(total_pages);
                 temp.setTotal_results(total_result);
+                temp.setOriginal_title(original_title);
+                temp.setOriginal_language(original_language);
+                temp.setId(serverId);
+                temp.setVote_count(voteCount);
 
                 temp.setOverview(origArray.getString(WebServiceParsingKeys.MovieKeys.OVERVIEW));
                 temp.setRelease_date(origArray.getString(WebServiceParsingKeys.MovieKeys.RELEASE_DATE));

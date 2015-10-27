@@ -91,6 +91,7 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
                     break;
                 }
                 sort_order = sort_populer;
+                sortingOrderListPrepare();
                 break;
 
             case R.id.action_sort_by_rating:
@@ -99,17 +100,25 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
                     break;
                 }
                 sort_order = sort_rating;
+                sortingOrderListPrepare();
+            case R.id.action_favourite:
+
                 break;
         }
 
-        /* Refresh list with sorting, Only if sorting order is changed by user*/
-        if (isSortingOrderChange) {
-            updateMovieList(sort_order);
-        }
+
 
         return super.onOptionsItemSelected(item);
     }
 
+    /*Sort Order Update by List*/
+    private void sortingOrderListPrepare()
+    {
+          /* Refresh list with sorting, Only if sorting order is changed by user*/
+        if (isSortingOrderChange) {
+            updateMovieList(sort_order);
+        }
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

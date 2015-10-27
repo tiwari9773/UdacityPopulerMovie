@@ -2,6 +2,7 @@
 
     <string name="action_sort_by_popularity">Most popular</string>
     <string name="action_sort_by_highest_rated">Highest-rated</string>
+    <string name="action_favourite">My Favourite</string>
     <string name="transition_thumbnail_to_poster">transit_movie_image</string>
 
 </resources>

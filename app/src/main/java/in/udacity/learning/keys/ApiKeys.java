@@ -5,5 +5,5 @@ package in.udacity.learning.keys;
  */
 public interface ApiKeys {
 
-    String movie_api_keys = "0fa829fc888260d7316187ab3e9dc115";
+  /* Designed to holds keys*/
 }

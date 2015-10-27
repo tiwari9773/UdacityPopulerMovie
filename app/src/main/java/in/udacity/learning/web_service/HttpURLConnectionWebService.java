@@ -14,6 +14,7 @@ import java.net.URL;
 import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.keys.ApiKeys;
 import in.udacity.learning.logger.L;
+import in.udacity.learning.populermovie.app.BuildConfig;
 import in.udacity.learning.populermovie.app.activities.MyApplication;
 
 /**
@@ -39,7 +40,7 @@ public class HttpURLConnectionWebService {
         try {
 
             Uri builtUri = Uri.parse(WebServiceURL.baseURL).buildUpon()
-                    .appendQueryParameter(WebServiceURL.API_KEY, ApiKeys.movie_api_keys)
+                    .appendQueryParameter(WebServiceURL.API_KEY, BuildConfig.OPEN_MOVIE_API_KEY)
                     .appendQueryParameter(WebServiceURL.PRIMARY_RELEASE_YEAR, primary_release_year)
                     .appendQueryParameter(WebServiceURL.SORT_BY, sort_by)
                     .appendQueryParameter(WebServiceURL.PAGES, requestedPage).build();

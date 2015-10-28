@@ -3,6 +3,7 @@ package in.udacity.learning.populermovie.app.fragment;
 import android.app.ActivityOptions;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -28,6 +29,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import in.udacity.learning.adapter.MovieViewAdapter;
+import in.udacity.learning.dbhelper.MovieContract;
 import in.udacity.learning.framework.OnMovieItemClickListener;
 import in.udacity.learning.listener.RecycleEndlessScrollListener;
 import in.udacity.learning.logger.L;
@@ -50,6 +52,7 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
     /* Option available for sorting */
     private String sort_populer = "popularity.desc";
     private String sort_rating = "vote_average.desc";
+    private String sort_favourite = "favourite";
 
     /* Current selected sorting , by default consider populer as sort */
     private String sort_order = sort_populer;
@@ -61,7 +64,7 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
     public static Drawable drawable;
 
     /*Endless scroll listener*/
-    RecycleEndlessScrollListener recycleEndlessScrollListener;
+    private RecycleEndlessScrollListener recycleEndlessScrollListener;
 
     // To reduce Overhead of continues toast to given delay by Timer
     private boolean isShowToast = true;
@@ -86,39 +89,61 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
 
         switch (item.getItemId()) {
             case R.id.action_sort_by_popularity:
-                if (sort_order == sort_populer) {
+
+                /*If There is no change as per record no need to initiate change*/
+                if (sort_order.equals(sort_populer)) {
                     isSortingOrderChange = false;
                     break;
                 }
+
+                /*If new Order to sort then it is acceptable to call webservice*/
                 sort_order = sort_populer;
-                sortingOrderListPrepare();
+                refreshNewMovieList(sort_order);
                 break;
 
             case R.id.action_sort_by_rating:
-                if (sort_order == sort_rating) {
+                if (sort_order.equals(sort_rating)) {
                     isSortingOrderChange = false;
                     break;
                 }
+
                 sort_order = sort_rating;
-                sortingOrderListPrepare();
+                refreshNewMovieList(sort_order);
             case R.id.action_favourite:
-
-                break;
+                if (sort_order.equals(sort_favourite)) {
+                    isSortingOrderChange = false;
+                    break;
+                }
+                sort_order = sort_favourite;
+                refreshNewMovieList(sort_order);
         }
-
-
 
         return super.onOptionsItemSelected(item);
     }
 
-    /*Sort Order Update by List*/
-    private void sortingOrderListPrepare()
-    {
-          /* Refresh list with sorting, Only if sorting order is changed by user*/
-        if (isSortingOrderChange) {
-            updateMovieList(sort_order);
+    /* Cursor Parsing*/
+    private void parseCursor(Cursor cursor) {
+
+        if (cursor != null) {
+            List<MovieItem> movieItems = new ArrayList<>();
+            cursor.moveToFirst();
+            do {
+                String oriTitle = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_ORIGINAL_TITLE));
+                String title = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_TITLE));
+                String popularity = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_POPULARITY));
+                String voteAverage = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_VOTE_AVERAGE));
+
+                MovieItem item = new MovieItem(oriTitle, title, popularity, voteAverage);
+                movieItems.add(item);
+            } while (cursor.moveToNext());
+
+            /*Reset List Before populating*/
+            movieViewAdapter.resetList();
+            populateList(movieItems);
         }
+
     }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -142,9 +167,9 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
     public void onStart() {
         super.onStart();
 
-        //for second time when user press back button we should no load again
+        //for second time when user press back button we should not load again
         if (mItem == null || mItem.size() == 0)
-            updateMovieList(sort_order);
+            refreshNewMovieList(sort_order);
     }
 
     @Override
@@ -174,13 +199,21 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
         recycleView.setAdapter(movieViewAdapter);
 
         /*On Scroll Listener*/
-        recycleView.setOnScrollListener(recycleEndlessScrollListener);
+        recycleView.addOnScrollListener(recycleEndlessScrollListener);
     }
 
-    private void updateMovieList(String sort_order) {
-        /* By default considering first page*/
-        int current_page = 1;
-        updateMovieList(sort_order, current_page);
+    /* Refresh Movie List with new Item, so starting from page 1*/
+    private void refreshNewMovieList(String sort_order) {
+
+        /* Refresh list with sorting, Only if sorting order is changed by user*/
+        if (sort_order.equals(sort_favourite)) {
+            Cursor cur = getActivity().getContentResolver().query(MovieContract.FavouriteMovie.CONTENT_URI, null, null, null, null);
+            parseCursor(cur);
+        } else {
+            /* By default considering first page*/
+            int current_page = 1;
+            updateMovieList(sort_order, current_page);
+        }
     }
 
     private void updateMovieList(String sortOrder, int current_page) {
@@ -250,29 +283,32 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
         protected void onPostExecute(List<MovieItem> movieItems) {
             super.onPostExecute(movieItems);
 
+            /*If it is new List, The position from list will append to existing list*/
             int position_start = 0;
+            /*Total New item available for list*/
             int item_count = 0;
 
-            /*If sorting order chagne everything will be reset as per new sorting list*/
+            /*If sorting order change everything will be reset as per new sorting list*/
             if (isSortingOrderChange) {
-                    /* Reset Sorting Order*/
+
+                /*Clear Local holding of List, So New List will be populated*/
+                mItem.clear();
+
+                /* Reset Sorting Order*/
                 isSortingOrderChange = false;
 
-                    /* Clear list new list will be added*/
+                /* Clear list new list will be added*/
                 movieViewAdapter.resetList();
 
                 /* Clear List which is being displayed*/
                 populateList(new ArrayList<MovieItem>());
-
-                /*Clear Local holding of List*/
-                mItem.clear();
             }
 
             if (movieItems != null) {
 
-                /*If size is greater than zero then only we can get position zero*/
+                /*set Total Pages to scroll*/
                 if (movieItems.size() > 0)
-                    recycleEndlessScrollListener.setMaxPages(Integer.parseInt(movieItems.get(0).getTotal_pages()));
+                    recycleEndlessScrollListener.setMaxPages(Integer.parseInt(MovieItem.getTotal_pages()));
 
                 if (mItem != null) {
                     position_start = mItem.size();
@@ -282,7 +318,7 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
             }
 
             if (mItem != null && movieItems != null) {
-                movieViewAdapter.setLsItem(movieItems);
+                movieViewAdapter.addListItem(movieItems);
                 movieViewAdapter.notifyItemRangeInserted(position_start, item_count);
             }
 
@@ -293,7 +329,7 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
 
     /**/
     private void populateList(List<MovieItem> movieItems) {
-        movieViewAdapter.setLsItem(movieItems);
+        movieViewAdapter.addListItem(movieItems);
         movieViewAdapter.notifyDataSetChanged();
     }
 

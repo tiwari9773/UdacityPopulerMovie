@@ -86,11 +86,13 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return super.getItemViewType(position);
     }
 
+    /*If New type of element is populated, then reset list*/
     public void resetList() {
         this.lsItem.clear();
     }
 
-    public void setLsItem(List<MovieItem> lsItem) {
+    /*Add More Item to existing list*/
+    public void addListItem(List<MovieItem> lsItem) {
         this.lsItem.addAll(lsItem);
     }
 

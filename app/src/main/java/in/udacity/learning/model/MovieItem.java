@@ -33,8 +33,8 @@ public class MovieItem implements Parcelable {
     private String video = "video";
     private String vote_average = "vote_average";
     private String vote_count = "vote_count";
-    private String total_pages = "total_pages";
-    private String total_results = "total_results";
+    private static String total_pages = "total_pages";
+    private static String total_results = "total_results";
 
     public MovieItem(String title, String poster_path, String popularity, String vote_avarge) {
         this.title = title;
@@ -139,22 +139,21 @@ public class MovieItem implements Parcelable {
         this.vote_count = vote_count;
     }
 
-    public String getTotal_pages() {
+    public static String getTotal_pages() {
         return total_pages;
     }
 
-    public void setTotal_pages(String total_pages) {
-        this.total_pages = total_pages;
+    public static void setTotal_pages(String total_pages) {
+        MovieItem.total_pages = total_pages;
     }
 
-    public String getTotal_results() {
+    public static String getTotal_results() {
         return total_results;
     }
 
-    public void setTotal_results(String total_results) {
-        this.total_results = total_results;
+    public static void setTotal_results(String total_results) {
+        MovieItem.total_results = total_results;
     }
-
 
     public String getPopularity() {
         return popularity;

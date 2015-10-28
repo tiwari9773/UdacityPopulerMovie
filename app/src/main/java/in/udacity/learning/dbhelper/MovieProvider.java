@@ -20,6 +20,7 @@ public class MovieProvider extends ContentProvider {
     /*Constant which identifies query*/
     public static final int FAVOURITE = 1;
     public static final int FAVOURITE_BY_ID = 2;
+    public static final int FAVOURITE_IMAGE = 3;
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -84,6 +85,9 @@ public class MovieProvider extends ContentProvider {
 
             case FAVOURITE_BY_ID:
                 return MovieContract.FavouriteMovie.CONTENT_ITEM_TYPE;
+
+//            case FAVOURITE_BY_ID:
+//                return MovieContract.FavouriteMovie.CONTENT_ITEM_TYPE;
         }
         return null;
     }

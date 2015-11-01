@@ -36,4 +36,12 @@ public interface WebServiceParsingKeys {
         String SIZE ="size";
         String TYPE ="type";
     }
+
+    interface ReviewKeys {
+        String RESULTS ="results";
+        String ID ="id";
+        String AUTHOR = "author";
+        String CONTENT ="content";
+        String URI ="url";
+    }
 }

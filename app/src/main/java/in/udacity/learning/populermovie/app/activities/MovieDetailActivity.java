@@ -39,6 +39,7 @@ import in.udacity.learning.adapter.TrailerViewAdapter;
 import in.udacity.learning.dbhelper.MovieContract;
 import in.udacity.learning.dbhelper.MovieProvider;
 import in.udacity.learning.listener.OnTrailerClickListener;
+import in.udacity.learning.model.ReviewItem;
 import in.udacity.learning.model.TrailerItem;
 import in.udacity.learning.network.NetWorkInfoUtility;
 import in.udacity.learning.populermovie.app.fragment.FragmentMain;
@@ -144,8 +145,10 @@ public class MovieDetailActivity extends AppCompatActivity implements OnTrailerC
 
 
          /* Check Trailer Values and link from server*/
-        if (new NetWorkInfoUtility().isNetWorkAvailableNow(this))
+        if (new NetWorkInfoUtility().isNetWorkAvailableNow(this)) {
             new FetchTrailerList().execute(new String[]{item.getId(), item.getPoster_path()});
+            new FetchReviewList().execute(new String[]{item.getId()});
+        }
 
         //Update Image with Big Image
         /* Change Width of poster so that it should not look bad*/
@@ -180,8 +183,6 @@ public class MovieDetailActivity extends AppCompatActivity implements OnTrailerC
                     Uri.parse(WebServiceURL.youTubeBaseUrl + youTubeKey));
             startActivity(intent);
         }
-
-
     }
 
     class FetchTrailerList extends AsyncTask<String, String, List<TrailerItem>> {
@@ -216,6 +217,39 @@ public class MovieDetailActivity extends AppCompatActivity implements OnTrailerC
         }
     }
 
+    class FetchReviewList extends AsyncTask<String, String, List<ReviewItem>> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            if (!dialog.isShowing())
+                progressLoading();
+        }
+
+        @Override
+        protected List<ReviewItem> doInBackground(String... params) {
+            String moviewId = params[0];
+            String jsonString = new HttpURLConnectionWebService().getReviewJSON(moviewId);
+            if (jsonString != null) {
+                List<ReviewItem> movieItems = JSONParser.parseReviewList(jsonString);
+                return movieItems;
+            } else
+                return null;
+        }
+
+        @Override
+        protected void onPostExecute(List<ReviewItem> items) {
+            super.onPostExecute(items);
+
+            if (items != null && items.size() > 0) {
+                setReview(items);
+            }
+            if (dialog != null && dialog.isShowing())
+                dialog.dismiss();
+        }
+    }
+
+    /*Set Trailer of movie*/
     private void setTrailerView(List<TrailerItem> item) {
         /*Trailer Setup*/
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_trailer);
@@ -226,6 +260,14 @@ public class MovieDetailActivity extends AppCompatActivity implements OnTrailerC
         recyclerView.addItemDecoration(recycleMarginDecoration);
         TrailerViewAdapter adapter = new TrailerViewAdapter(item, this);
         recyclerView.setAdapter(adapter);
+    }
+
+    /* Review of Author*/
+    private void setReview(List<ReviewItem> item) {
+        TextView author = (TextView) findViewById(R.id.tv_author);
+        TextView content = (TextView) findViewById(R.id.tv_content);
+        author.setText(item.get(0).getAuthor());
+        content.setText(item.get(0).getUri());
     }
 
     // Dialog Progress

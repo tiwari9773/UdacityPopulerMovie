@@ -13,6 +13,7 @@ import java.util.List;
 
 import in.udacity.learning.dbhelper.MovieContract;
 import in.udacity.learning.model.MovieItem;
+import in.udacity.learning.model.ReviewItem;
 import in.udacity.learning.model.TrailerItem;
 
 /**
@@ -90,6 +91,33 @@ public class JSONParser {
 
                 TrailerItem temp = new TrailerItem(id, name, keys, type);
                 temp.setTrailerPath(path);
+                lsObj.add(temp);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return lsObj;
+    }
+
+    // give the parsed result of Review list
+    public static List<ReviewItem> parseReviewList(String jSonString) {
+        List<ReviewItem> lsObj = new ArrayList();
+
+        try {
+            JSONObject jsonObject = new JSONObject(jSonString);
+            JSONArray jsonArray = jsonObject.getJSONArray(WebServiceParsingKeys.ReviewKeys.RESULTS);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject origArray = jsonArray.getJSONObject(i);
+
+                String id = origArray.getString(WebServiceParsingKeys.ReviewKeys.ID);
+                String author = origArray.getString(WebServiceParsingKeys.ReviewKeys.AUTHOR);
+                String content = origArray.getString(WebServiceParsingKeys.ReviewKeys.CONTENT);
+                String url = origArray.getString(WebServiceParsingKeys.ReviewKeys.URI);
+
+                ReviewItem temp = new ReviewItem(id, author, content);
+                temp.setUri(url);
                 lsObj.add(temp);
             }
 

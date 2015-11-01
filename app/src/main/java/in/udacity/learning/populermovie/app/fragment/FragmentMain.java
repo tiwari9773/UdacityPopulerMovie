@@ -60,7 +60,6 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
     /*Identify same is getting selecting or not*/
     private boolean isSortingOrderChange = false;
 
-    private ProgressDialog dialog;
     /*To transfer Click Image to next page
     * Purposely didn't used approach to save on directory and send path, because it will delay the process
     * and create lag in animation of transition*/
@@ -121,8 +120,12 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
             @Override
             public void onLoadMore(int current_page) {
                 //add progress item
-                if (mItems != null)
+                if (mItems != null) {
                     mItems.add(null);
+                    if (AppConstant.DEBUG)
+                        Toast.makeText(getActivity(), mItems.size() + "Added Loaded", Toast.LENGTH_SHORT).show();
+
+                }
 
                 movieViewAdapter.notifyItemInserted(mItems.size());
                 updateMovieList(sort_order, current_page);
@@ -237,21 +240,13 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
         }
     }
 
-    // Dialog Progress
-    private void progressLoading() {
-        dialog = new ProgressDialog(getContext(), android.R.style.Theme_DeviceDefault_Dialog_NoActionBar);
-        dialog.setIndeterminate(true);
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.show();
-    }
-
     class FetchMovieList extends AsyncTask<String, String, List<MovieItem>> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             //progressLoading();
-            Toast.makeText(getActivity(), mItems.size()+"Presize", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), mItems.size() + "Presize", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -272,11 +267,6 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
         protected void onPostExecute(List<MovieItem> movieItems) {
             super.onPostExecute(movieItems);
 
-            /*If it is new List, The position from list will append to existing list*/
-            int position_start = 0;
-            /*Total New item available for list*/
-            int item_count = 0;
-
             /*If sorting order change everything will be reset as per new sorting list*/
             if (isSortingOrderChange) {
 
@@ -292,46 +282,32 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
                 /* Clear List which is being displayed*/
                 populateList(new ArrayList<MovieItem>());
             }
-            if(AppConstant.DEBUG)
-                Toast.makeText(getActivity(), mItems.size()+"Before Remove", Toast.LENGTH_SHORT).show();
+            if (AppConstant.DEBUG)
+                Toast.makeText(getActivity(), mItems.size() + "Before Remove", Toast.LENGTH_SHORT).show();
 
             if (movieItems != null) {
 
                 /*set Total Pages to scroll*/
                 if (movieItems.size() > 0)
-                    recycleEndlessScrollListener.setMaxPages(2);
-                //recycleEndlessScrollListener.setMaxPages(Integer.parseInt(MovieItem.getTotal_pages()));
+                    recycleEndlessScrollListener.setMaxPages(Integer.parseInt(MovieItem.getTotal_pages()));
 
                 if (mItems != null) {
                     //remove progress item
                     mItems.remove(mItems.size() - 1);
                     movieViewAdapter.notifyItemRemoved(mItems.size());
 
-                    if(AppConstant.DEBUG)
-                        Toast.makeText(getActivity(), mItems.size()+"AfterRemove", Toast.LENGTH_SHORT).show();
+                    if (AppConstant.DEBUG)
+                        Toast.makeText(getActivity(), mItems.size() + "AfterRemove", Toast.LENGTH_SHORT).show();
 
-                    /*Track Position so that we can add more Item when user scolls*/
-                    position_start = mItems.size();
-                    item_count = movieItems.size();
-
-                    if(AppConstant.DEBUG)
-                        Toast.makeText(getActivity(), item_count+"movieItems.size()", Toast.LENGTH_SHORT).show();
                     mItems.addAll(movieItems);
-
                 }
             }
 
             if (mItems != null && movieItems != null) {
+                if (AppConstant.DEBUG)
+                    Toast.makeText(getActivity(), mItems.size() + "Last Mode", Toast.LENGTH_SHORT).show();
 
-                if(AppConstant.DEBUG)
-                    Toast.makeText(getActivity(), mItems.size()+"Last Mode", Toast.LENGTH_SHORT).show();
-
-                //movieViewAdapter.addListItem(movieItems);
-                //movieViewAdapter.notifyItemRangeInserted(position_start, item_count);
             }
-
-//            if (dialog != null && dialog.isShowing())
-//                dialog.dismiss();
         }
     }
 

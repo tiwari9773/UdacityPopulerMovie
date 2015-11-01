@@ -54,9 +54,9 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int i) {
         if (holder instanceof MovieHolder) {
             MovieHolder movieHolder = (MovieHolder) holder;
-            movieHolder.tvMovieName.setText(lsItem.get(i).getTitle()+"-"+i+"-"+lsItem.size());
-            movieHolder.tvPopularity.setText("Popularity = " + lsItem.get(i).getPopularity());
-            movieHolder.tvVoting.setText("Average Vote = " + lsItem.get(i).getVote_average());
+            movieHolder.tvMovieName.setText(lsItem.get(i).getTitle() + "-" + i + "-" + lsItem.size());
+//            movieHolder.tvPopularity.setText("Popularity = " + lsItem.get(i).getPopularity());
+//            movieHolder.tvVoting.setText("Average Vote = " + lsItem.get(i).getVote_average());
 
             Glide.with(movieHolder.tvMovieName.getContext())
                     .load(lsItem.get(i).getPoster_path())
@@ -77,7 +77,8 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public int getItemViewType(int position) {
         if (lsItem.size() == 0)
             return EMPTY_VIEW;
-        if (lsItem.size() == position + 1)
+        /*null Indicate Loader*/
+        if (lsItem.get(position) == null)
             return PROGRESS_VIEW;
 
         return super.getItemViewType(position);
@@ -105,8 +106,8 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             imageView = (ImageView) itemView.findViewById(R.id.iv_movie_thumbnail);
             tvMovieName = (TextView) itemView.findViewById(R.id.tv_movie_name);
-            tvPopularity = (TextView) itemView.findViewById(R.id.tv_popularity);
-            tvVoting = (TextView) itemView.findViewById(R.id.tv_vote);
+//            tvPopularity = (TextView) itemView.findViewById(R.id.tv_popularity);
+//            tvVoting = (TextView) itemView.findViewById(R.id.tv_vote);
 
             // What would be best way for Recycle Click Listener
             imageView.setOnClickListener(new View.OnClickListener() {

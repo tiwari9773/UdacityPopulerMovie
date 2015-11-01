@@ -38,8 +38,6 @@ public class HttpURLConnectionWebService {
 
     /* Tag is only for marking which class is calling this method*/
     public String getMovieJSON(String TAG) {
-        HttpURLConnection httpURLConnection = null;
-        BufferedReader bufferedReader = null;
          /* Take an URL Object*/
         try {
 
@@ -50,56 +48,16 @@ public class HttpURLConnectionWebService {
                     .appendQueryParameter(WebServiceURL.PAGES, requestedPage).build();
             URL url = new URL(builtUri.toString());
 
-                /* */
-            if (AppConstant.DEVELOPER)
-                Log.v(TAG, builtUri.toString());
-
-            httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setRequestMethod("GET");
-            httpURLConnection.connect();
-
-            InputStream inputStream = httpURLConnection.getInputStream();
-            StringBuffer stringBuffer = new StringBuffer();
-
-            if (inputStream == null) {
-                return null;
-            }
-
-            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = "";
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuffer.append(line + " " + "\\n");
-            }
-
-            if (stringBuffer.length() == 0) {
-                return null;
-            }
-
-            return stringBuffer.toString();
+            String json = getJSONString(url);
+            return json;
         } catch (MalformedURLException e) {
-            L.lToast(MyApplication.getInstance().getContext(), e.toString());
-            //e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (httpURLConnection != null)
-                httpURLConnection.disconnect();
-
-            if (bufferedReader != null)
-                try {
-                    bufferedReader.close();
-                } catch (final Exception e) {
-                    L.lToast(MyApplication.getInstance().getContext(), e.toString());
-                }
         }
         return null;
     }
 
     /* Tag is only for marking which class is calling this method*/
     public String getTrailerJSON(String movieId) {
-        HttpURLConnection httpURLConnection = null;
-        BufferedReader bufferedReader = null;
-         /* Take an URL Object*/
         try {
 
             Uri builtUri = Uri.parse(WebServiceURL.baseURLTrailer).buildUpon().appendPath(movieId).appendPath("videos")
@@ -107,9 +65,40 @@ public class HttpURLConnectionWebService {
                     .build();
             URL url = new URL(builtUri.toString());
 
+            String json = getJSONString(url);
+            return json;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /* Tag is only for marking which class is calling this method*/
+    public String getReviewJSON(String movieId) {
+        try {
+
+            Uri builtUri = Uri.parse(WebServiceURL.baseURLTrailer).buildUpon().appendPath(movieId).appendPath("reviews")
+                    .appendQueryParameter(WebServiceURL.API_KEY, BuildConfig.OPEN_MOVIE_API_KEY)
+                    .build();
+            URL url = new URL(builtUri.toString());
+
+            String json = getJSONString(url);
+            return json;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String getJSONString(URL url) {
+        HttpURLConnection httpURLConnection = null;
+        BufferedReader bufferedReader = null;
+         /* Take an URL Object*/
+        try {
+
                 /* */
             if (AppConstant.DEVELOPER)
-                Log.v(TAG, builtUri.toString());
+                Log.v(TAG, url.toString());
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setRequestMethod("GET");
@@ -125,7 +114,7 @@ public class HttpURLConnectionWebService {
             bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String line = "";
             while ((line = bufferedReader.readLine()) != null) {
-                stringBuffer.append(line + " " + "\\n");
+                stringBuffer.append(line + " ");
             }
 
             if (stringBuffer.length() == 0) {

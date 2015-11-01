@@ -29,7 +29,7 @@ public abstract class RecycleEndlessScrollListener extends RecyclerView.OnScroll
     private int currentPage = 1;
 
     // Set Total no of pages requred to be loaded
-    private int maxPages = 2;
+    private int maxPages = 1;
 
     public int getMaxPages() {
         return maxPages;

@@ -3,7 +3,7 @@ package in.udacity.learning.model;
 /**
  * Created by Lokesh on 01-11-2015.
  */
-public class TrailerItem {
+public class TrailerItem implements MarkerItem{
 
     String id = "test";
     String iso_639_1 = "test";

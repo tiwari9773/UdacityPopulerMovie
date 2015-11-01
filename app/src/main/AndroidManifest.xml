@@ -19,12 +19,13 @@
         </activity>
 
         <activity
-            android:name=".activities.MovieDetailActivity"
+            android:name=".activities.MovieDetailActivityMobile"
             android:parentActivityName=".activities.MainActivity" />
 
+        <receiver android:name=".activities.MainActivity$MyBroadcastReciver" />
         <provider
-            android:authorities="@string/content_authority"
             android:name="in.udacity.learning.dbhelper.MovieProvider"
+            android:authorities="@string/content_authority"
             android:exported="false"
             android:syncable="true" />
     </application>

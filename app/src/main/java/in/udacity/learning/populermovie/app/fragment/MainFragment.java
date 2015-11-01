@@ -1,12 +1,10 @@
 package in.udacity.learning.populermovie.app.fragment;
 
-import android.app.ActivityOptions;
-import android.app.ProgressDialog;
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -23,8 +21,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import in.udacity.learning.adapter.MovieViewAdapter;
 import in.udacity.learning.adapter.RecycleMarginDecoration;
@@ -35,7 +31,6 @@ import in.udacity.learning.listener.RecycleEndlessScrollListener;
 import in.udacity.learning.logger.L;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.network.NetWorkInfoUtility;
-import in.udacity.learning.populermovie.app.activities.MovieDetailActivity;
 import in.udacity.learning.populermovie.app.R;
 import in.udacity.learning.web_service.HttpURLConnectionWebService;
 import in.udacity.learning.web_service.JSONParser;
@@ -43,7 +38,7 @@ import in.udacity.learning.web_service.JSONParser;
 /**
  * Created by Lokesh on 13-09-2015.
  */
-public class FragmentMain extends Fragment implements OnMovieItemClickListener {
+public class MainFragment extends Fragment implements OnMovieItemClickListener {
     private String TAG = getClass().getName();
 
     private MovieViewAdapter movieViewAdapter;
@@ -68,13 +63,31 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
     /*Endless scroll listener*/
     private RecycleEndlessScrollListener recycleEndlessScrollListener;
 
-    // To reduce Overhead of continues toast to given delay by Timer
-    private boolean isShowToast = true;
+    /*Make first item selected first time*/
+    private boolean isFirstSelected = false;
 
-    // Timer which control toast display
-    private Timer mTimer;
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        void onItemSelected(MovieItem item, View clickedView);
+    }
 
-    public FragmentMain() {
+    /*Call back Reference*/
+    private Callback referenceForCallback;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        referenceForCallback = (Callback) activity;
+    }
+
+    public MainFragment() {
         setHasOptionsMenu(true);
     }
 
@@ -83,16 +96,6 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         initialise(view);
-
-        // Timer which control over flooded toast message
-        mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
-
-            @Override
-            public void run() {
-                isShowToast = true;
-            }
-        }, 1000, 500);
 
         return view;
     }
@@ -106,14 +109,6 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
             refreshNewMovieList(sort_order);
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        if (mTimer != null)
-            mTimer.cancel();
-    }
-
     private void initialise(View view) {
 
         recycleEndlessScrollListener = new RecycleEndlessScrollListener() {
@@ -124,14 +119,12 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
                     mItems.add(null);
                     if (AppConstant.DEBUG)
                         Toast.makeText(getActivity(), mItems.size() + "Added Loaded", Toast.LENGTH_SHORT).show();
-
                 }
 
                 movieViewAdapter.notifyItemInserted(mItems.size());
                 updateMovieList(sort_order, current_page);
             }
         };
-
 
         RecyclerView recycleView = (RecyclerView) view.findViewById(R.id.rv_movie_list);
         //final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -198,7 +191,8 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
         /* Refresh list with sorting, Only if sorting order is changed by user*/
         if (sort_order.equals(sort_favourite)) {
             Cursor cur = getActivity().getContentResolver().query(MovieContract.FavouriteMovie.CONTENT_URI, null, null, null, null);
-            parseCursor(cur);
+            if (cur != null && cur.getCount() > 0)
+                parseCursor(cur);
         } else {
             /*For Progress Bar*/
             if (mItems != null)
@@ -226,28 +220,10 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
 
         ImageView img = (ImageView) view;
         drawable = img.getDrawable();
-        MovieItem temp = mItems.get(position);
-
-        Intent in = new Intent(getActivity(), MovieDetailActivity.class);
-        in.putExtra(Intent.EXTRA_TEXT, temp);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            String transition = getContext().getString(R.string.transition_thumbnail_to_poster);
-            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(getActivity(), view, transition);
-            getActivity().startActivity(in, options.toBundle());
-        } else {
-            startActivity(in);
-        }
+        referenceForCallback.onItemSelected(mItems.get(position), view);
     }
 
     class FetchMovieList extends AsyncTask<String, String, List<MovieItem>> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //progressLoading();
-            Toast.makeText(getActivity(), mItems.size() + "Presize", Toast.LENGTH_SHORT).show();
-        }
 
         @Override
         protected List<MovieItem> doInBackground(String... params) {
@@ -303,11 +279,12 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
                 }
             }
 
-            if (mItems != null && movieItems != null) {
-                if (AppConstant.DEBUG)
-                    Toast.makeText(getActivity(), mItems.size() + "Last Mode", Toast.LENGTH_SHORT).show();
-
+             /*Make first item selected first time*/
+            if (!isFirstSelected) {
+                isFirstSelected = true;
+                getActivity().sendBroadcast(new Intent(AppConstant.FILTER_OBJECT));
             }
+
         }
     }
 

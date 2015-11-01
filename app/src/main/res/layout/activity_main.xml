@@ -7,10 +7,11 @@
 
     <include layout="@layout/layout_toolbar"></include>
 
-    <FrameLayout
+    <fragment
+        android:name="in.udacity.learning.populermovie.app.fragment.MainFragment"
         android:id="@+id/frag_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout="@layout/fragment_main"></FrameLayout>
+        tools:layout="@layout/fragment_main"></fragment>
 
 </LinearLayout>

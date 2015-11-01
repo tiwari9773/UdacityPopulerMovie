@@ -13,4 +13,7 @@ public class AppConstant {
 
 
     public static String TYPE_TEXT_DATA_TRANS = "text/plain";
+
+    public static final String OBJECT = "obj";
+    public static final String FILTER_OBJECT = "intent_filter";
 }

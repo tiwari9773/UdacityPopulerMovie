@@ -213,7 +213,7 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progressLoading();
+            //progressLoading();
         }
 
         @Override
@@ -235,19 +235,10 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
             if (items != null && items.size() > 0) {
                 setTrailerView(items);
             }
-            if (dialog != null && dialog.isShowing())
-                dialog.dismiss();
         }
     }
 
     class FetchReviewList extends AsyncTask<String, String, List<ReviewItem>> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            if (!dialog.isShowing())
-                progressLoading();
-        }
 
         @Override
         protected List<ReviewItem> doInBackground(String... params) {
@@ -267,8 +258,6 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
             if (items != null && items.size() > 0) {
                 setReview(items);
             }
-            if (dialog != null && dialog.isShowing())
-                dialog.dismiss();
         }
     }
 

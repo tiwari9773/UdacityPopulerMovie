@@ -197,12 +197,6 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
     class FetchTrailerList extends AsyncTask<String, String, List<TrailerItem>> {
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressLoading();
-        }
-
-        @Override
         protected List<TrailerItem> doInBackground(String... params) {
             String moviewId = params[0];
             String path = params[1];
@@ -221,19 +215,10 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
             if (items != null && items.size() > 0) {
                 setTrailerView(items);
             }
-            if (dialog != null && dialog.isShowing())
-                dialog.dismiss();
         }
     }
 
     class FetchReviewList extends AsyncTask<String, String, List<ReviewItem>> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            if (!dialog.isShowing())
-                progressLoading();
-        }
 
         @Override
         protected List<ReviewItem> doInBackground(String... params) {
@@ -253,8 +238,6 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
             if (items != null && items.size() > 0) {
                 setReview(items);
             }
-            if (dialog != null && dialog.isShowing())
-                dialog.dismiss();
         }
     }
 

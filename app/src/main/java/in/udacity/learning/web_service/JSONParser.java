@@ -11,7 +11,9 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import in.udacity.learning.dbhelper.MovieContract;
 import in.udacity.learning.model.MovieItem;
+import in.udacity.learning.model.TrailerItem;
 
 /**
  * Created by Lokesh on 06-09-2015.
@@ -44,7 +46,7 @@ public class JSONParser {
                 String original_title = origArray.getString(WebServiceParsingKeys.MovieKeys.ORIGINAL_TITLE);
                 String original_language = origArray.getString(WebServiceParsingKeys.MovieKeys.ORIGINAL_LANGUAGE);
                 String serverId = origArray.getString(WebServiceParsingKeys.MovieKeys.ID);
-                String path = origArray.getString(WebServiceParsingKeys.MovieKeys.POSTER_PATH);
+                String path = WebServiceURL.baseURLThumbnail + "/" + origArray.getString(WebServiceParsingKeys.MovieKeys.POSTER_PATH);
                 String popularity = origArray.getString(WebServiceParsingKeys.MovieKeys.POPULARITY);
                 String vote_avarage = origArray.getString(WebServiceParsingKeys.MovieKeys.VOTE_AVERAGE);
                 String voteCount = origArray.getString(WebServiceParsingKeys.MovieKeys.VOTE_COUNT);
@@ -64,6 +66,37 @@ public class JSONParser {
             e.printStackTrace();
         }
         return lsMovie;
+    }
+
+    /*Trailer Parsing*/
+    // give the parsed result of movie list
+    public static List<TrailerItem> parseTrailerList(String jSonString, String path) {
+        List<TrailerItem> lsObj = new ArrayList();
+
+        try {
+            JSONObject jsonObject = new JSONObject(jSonString);
+            JSONArray jsonArray = jsonObject.getJSONArray(WebServiceParsingKeys.TrailerKeys.RESULTS);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject origArray = jsonArray.getJSONObject(i);
+
+                String id = origArray.getString(WebServiceParsingKeys.TrailerKeys.ID);
+                String iso_639_1 = origArray.getString(WebServiceParsingKeys.TrailerKeys.ISO_639_1);
+                String keys = origArray.getString(WebServiceParsingKeys.TrailerKeys.KEY);
+                String name = origArray.getString(WebServiceParsingKeys.TrailerKeys.NAME);
+                String site = origArray.getString(WebServiceParsingKeys.TrailerKeys.SITE);
+                String size = origArray.getString(WebServiceParsingKeys.TrailerKeys.SIZE);
+                String type = origArray.getString(WebServiceParsingKeys.TrailerKeys.TYPE);
+
+                TrailerItem temp = new TrailerItem(id, name, keys, type);
+                temp.setTrailerPath(path);
+                lsObj.add(temp);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return lsObj;
     }
 
     /* The date/time conversion code is going to be moved outside the asynctask later,

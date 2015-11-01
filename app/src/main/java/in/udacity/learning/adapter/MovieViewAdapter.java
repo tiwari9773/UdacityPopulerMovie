@@ -11,8 +11,7 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 
-import in.udacity.learning.web_service.WebServiceURL;
-import in.udacity.learning.framework.OnMovieItemClickListener;
+import in.udacity.learning.listener.OnMovieItemClickListener;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.populermovie.app.R;
 
@@ -24,6 +23,7 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private List<MovieItem> lsItem;
     private OnMovieItemClickListener onMovieItemClickListener;
     private final int EMPTY_VIEW = -1;
+    private final int PROGRESS_VIEW = 1;
 
     public MovieViewAdapter(List<MovieItem> lsItem, OnMovieItemClickListener onMovieItemClickListener) {
         this.lsItem = lsItem;
@@ -34,7 +34,11 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
 
         View view;
-        if (viewType == EMPTY_VIEW) {
+        if (viewType == PROGRESS_VIEW) {
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_progress_view, viewGroup, false);
+            ProgressViewHolder movieHolder = new ProgressViewHolder(view);
+            return movieHolder;
+        } else if (viewType == EMPTY_VIEW) {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.empty_view, viewGroup, false);
             EmptyViewHolder evh = new EmptyViewHolder(view);
             return evh;
@@ -50,26 +54,17 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int i) {
         if (holder instanceof MovieHolder) {
             MovieHolder movieHolder = (MovieHolder) holder;
-            movieHolder.tvMovieName.setText(lsItem.get(i).getTitle());
+            movieHolder.tvMovieName.setText(lsItem.get(i).getTitle()+"-"+i+"-"+lsItem.size());
             movieHolder.tvPopularity.setText("Popularity = " + lsItem.get(i).getPopularity());
             movieHolder.tvVoting.setText("Average Vote = " + lsItem.get(i).getVote_average());
+
             Glide.with(movieHolder.tvMovieName.getContext())
-                    .load(WebServiceURL.baseURLThumbnail + "/" + lsItem.get(i).getPoster_path())
+                    .load(lsItem.get(i).getPoster_path())
                     .centerCrop()
                     .placeholder(R.mipmap.ic_launcher)
                     .crossFade()
                     .into(movieHolder.imageView);
         }
-
-//        AnimatorSet animatorSet = new AnimatorSet();
-//        ObjectAnimator scaleY = ObjectAnimator.ofFloat(movieHolder.itemView, "scaleY", 1f, 1.5f);
-//        ObjectAnimator scaleX = ObjectAnimator.ofFloat(movieHolder.itemView, "scaleX", 1f, 1.5f);
-//        scaleY.setInterpolator(new DecelerateInterpolator());
-//        scaleX.setInterpolator(new DecelerateInterpolator());
-//
-//        animatorSet.playTogether(scaleY,scaleX);
-//        animatorSet.setDuration(700);
-//        animatorSet.start();
 
     }
 
@@ -82,6 +77,8 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public int getItemViewType(int position) {
         if (lsItem.size() == 0)
             return EMPTY_VIEW;
+        if (lsItem.size() == position + 1)
+            return PROGRESS_VIEW;
 
         return super.getItemViewType(position);
     }
@@ -103,7 +100,6 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         TextView tvPopularity;
         TextView tvVoting;
 
-
         public MovieHolder(View itemView) {
             super(itemView);
 
@@ -124,6 +120,12 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     class EmptyViewHolder extends RecyclerView.ViewHolder {
         public EmptyViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
+
+    class ProgressViewHolder extends RecyclerView.ViewHolder {
+        public ProgressViewHolder(View itemView) {
             super(itemView);
         }
     }

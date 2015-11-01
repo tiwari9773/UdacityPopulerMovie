@@ -86,8 +86,6 @@ public class MovieProvider extends ContentProvider {
             case FAVOURITE_BY_ID:
                 return MovieContract.FavouriteMovie.CONTENT_ITEM_TYPE;
 
-//            case FAVOURITE_BY_ID:
-//                return MovieContract.FavouriteMovie.CONTENT_ITEM_TYPE;
         }
         return null;
     }

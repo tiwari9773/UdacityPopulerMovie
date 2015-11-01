@@ -8,12 +8,10 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,8 +27,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import in.udacity.learning.adapter.MovieViewAdapter;
+import in.udacity.learning.adapter.RecycleMarginDecoration;
+import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.dbhelper.MovieContract;
-import in.udacity.learning.framework.OnMovieItemClickListener;
+import in.udacity.learning.listener.OnMovieItemClickListener;
 import in.udacity.learning.listener.RecycleEndlessScrollListener;
 import in.udacity.learning.logger.L;
 import in.udacity.learning.model.MovieItem;
@@ -47,7 +47,7 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
     private String TAG = getClass().getName();
 
     private MovieViewAdapter movieViewAdapter;
-    private List<MovieItem> mItem = new ArrayList<>();
+    private List<MovieItem> mItems = new ArrayList<>();
 
     /* Option available for sorting */
     private String sort_populer = "popularity.desc";
@@ -61,6 +61,9 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
     private boolean isSortingOrderChange = false;
 
     private ProgressDialog dialog;
+    /*To transfer Click Image to next page
+    * Purposely didn't used approach to save on directory and send path, because it will delay the process
+    * and create lag in animation of transition*/
     public static Drawable drawable;
 
     /*Endless scroll listener*/
@@ -74,6 +77,71 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
 
     public FragmentMain() {
         setHasOptionsMenu(true);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        initialise(view);
+
+        // Timer which control over flooded toast message
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                isShowToast = true;
+            }
+        }, 1000, 500);
+
+        return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        //for second time when user press back button we should not load again
+        if (mItems == null || mItems.size() == 0)
+            refreshNewMovieList(sort_order);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (mTimer != null)
+            mTimer.cancel();
+    }
+
+    private void initialise(View view) {
+
+        recycleEndlessScrollListener = new RecycleEndlessScrollListener() {
+            @Override
+            public void onLoadMore(int current_page) {
+                //add progress item
+                if (mItems != null)
+                    mItems.add(null);
+
+                movieViewAdapter.notifyItemInserted(mItems.size());
+                updateMovieList(sort_order, current_page);
+            }
+        };
+
+
+        RecyclerView recycleView = (RecyclerView) view.findViewById(R.id.rv_movie_list);
+        //final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        final GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
+        recycleView.setLayoutManager(layoutManager);
+
+        RecycleMarginDecoration marginDecoration = new RecycleMarginDecoration(getContext());
+        recycleView.addItemDecoration(marginDecoration);
+        movieViewAdapter = new MovieViewAdapter(mItems, this);
+        recycleView.setAdapter(movieViewAdapter);
+
+        /*On Scroll Listener*/
+        recycleView.addOnScrollListener(recycleEndlessScrollListener);
     }
 
     @Override
@@ -121,87 +189,6 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
         return super.onOptionsItemSelected(item);
     }
 
-    /* Cursor Parsing*/
-    private void parseCursor(Cursor cursor) {
-
-        if (cursor != null) {
-            List<MovieItem> movieItems = new ArrayList<>();
-            cursor.moveToFirst();
-            do {
-                String oriTitle = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_ORIGINAL_TITLE));
-                String title = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_TITLE));
-                String popularity = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_POPULARITY));
-                String voteAverage = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_VOTE_AVERAGE));
-
-                MovieItem item = new MovieItem(oriTitle, title, popularity, voteAverage);
-                movieItems.add(item);
-            } while (cursor.moveToNext());
-
-            /*Reset List Before populating*/
-            movieViewAdapter.resetList();
-            populateList(movieItems);
-        }
-
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
-        initialise(view);
-
-        // Timer which control over flooded toast message
-        mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
-
-            @Override
-            public void run() {
-                isShowToast = true;
-            }
-        }, 1000, 500);
-
-        return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        //for second time when user press back button we should not load again
-        if (mItem == null || mItem.size() == 0)
-            refreshNewMovieList(sort_order);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        if (mTimer != null)
-            mTimer.cancel();
-    }
-
-    private void initialise(View view) {
-
-        recycleEndlessScrollListener = new RecycleEndlessScrollListener() {
-            @Override
-            public void onLoadMore(int current_page) {
-                updateMovieList(sort_order, current_page);
-            }
-        };
-
-
-        RecyclerView recycleView = (RecyclerView) view.findViewById(R.id.rv_movie_list);
-        //final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        final GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
-        recycleView.setLayoutManager(layoutManager);
-
-        movieViewAdapter = new MovieViewAdapter(mItem, this);
-        recycleView.setAdapter(movieViewAdapter);
-
-        /*On Scroll Listener*/
-        recycleView.addOnScrollListener(recycleEndlessScrollListener);
-    }
-
     /* Refresh Movie List with new Item, so starting from page 1*/
     private void refreshNewMovieList(String sort_order) {
 
@@ -210,6 +197,10 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
             Cursor cur = getActivity().getContentResolver().query(MovieContract.FavouriteMovie.CONTENT_URI, null, null, null, null);
             parseCursor(cur);
         } else {
+            /*For Progress Bar*/
+            if (mItems != null)
+                mItems.add(null);
+
             /* By default considering first page*/
             int current_page = 1;
             updateMovieList(sort_order, current_page);
@@ -227,22 +218,19 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
         }
     }
 
-
     @Override
     public void onClickMovieThumbnail(View view, int position) {
 
         ImageView img = (ImageView) view;
         drawable = img.getDrawable();
-        MovieItem temp = mItem.get(position);
+        MovieItem temp = mItems.get(position);
 
         Intent in = new Intent(getActivity(), MovieDetailActivity.class);
         in.putExtra(Intent.EXTRA_TEXT, temp);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            String trasnition = getContext().getString(R.string.transition_thumbnail_to_poster);
-            ActivityOptions options = ActivityOptions
-                    .makeSceneTransitionAnimation(getActivity(), view, trasnition);
-
+            String transition = getContext().getString(R.string.transition_thumbnail_to_poster);
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(getActivity(), view, transition);
             getActivity().startActivity(in, options.toBundle());
         } else {
             startActivity(in);
@@ -262,7 +250,8 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progressLoading();
+            //progressLoading();
+            Toast.makeText(getActivity(), mItems.size()+"Presize", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -292,7 +281,7 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
             if (isSortingOrderChange) {
 
                 /*Clear Local holding of List, So New List will be populated*/
-                mItem.clear();
+                mItems.clear();
 
                 /* Reset Sorting Order*/
                 isSortingOrderChange = false;
@@ -303,27 +292,46 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
                 /* Clear List which is being displayed*/
                 populateList(new ArrayList<MovieItem>());
             }
+            if(AppConstant.DEBUG)
+                Toast.makeText(getActivity(), mItems.size()+"Before Remove", Toast.LENGTH_SHORT).show();
 
             if (movieItems != null) {
 
                 /*set Total Pages to scroll*/
                 if (movieItems.size() > 0)
-                    recycleEndlessScrollListener.setMaxPages(Integer.parseInt(MovieItem.getTotal_pages()));
+                    recycleEndlessScrollListener.setMaxPages(2);
+                //recycleEndlessScrollListener.setMaxPages(Integer.parseInt(MovieItem.getTotal_pages()));
 
-                if (mItem != null) {
-                    position_start = mItem.size();
+                if (mItems != null) {
+                    //remove progress item
+                    mItems.remove(mItems.size() - 1);
+                    movieViewAdapter.notifyItemRemoved(mItems.size());
+
+                    if(AppConstant.DEBUG)
+                        Toast.makeText(getActivity(), mItems.size()+"AfterRemove", Toast.LENGTH_SHORT).show();
+
+                    /*Track Position so that we can add more Item when user scolls*/
+                    position_start = mItems.size();
                     item_count = movieItems.size();
-                    mItem.addAll(movieItems);
+
+                    if(AppConstant.DEBUG)
+                        Toast.makeText(getActivity(), item_count+"movieItems.size()", Toast.LENGTH_SHORT).show();
+                    mItems.addAll(movieItems);
+
                 }
             }
 
-            if (mItem != null && movieItems != null) {
-                movieViewAdapter.addListItem(movieItems);
-                movieViewAdapter.notifyItemRangeInserted(position_start, item_count);
+            if (mItems != null && movieItems != null) {
+
+                if(AppConstant.DEBUG)
+                    Toast.makeText(getActivity(), mItems.size()+"Last Mode", Toast.LENGTH_SHORT).show();
+
+                //movieViewAdapter.addListItem(movieItems);
+                //movieViewAdapter.notifyItemRangeInserted(position_start, item_count);
             }
 
-            if (dialog != null && dialog.isShowing())
-                dialog.dismiss();
+//            if (dialog != null && dialog.isShowing())
+//                dialog.dismiss();
         }
     }
 
@@ -331,6 +339,34 @@ public class FragmentMain extends Fragment implements OnMovieItemClickListener {
     private void populateList(List<MovieItem> movieItems) {
         movieViewAdapter.addListItem(movieItems);
         movieViewAdapter.notifyDataSetChanged();
+    }
+
+
+    /* Cursor Parsing*/
+    private void parseCursor(Cursor cursor) {
+
+        if (cursor != null) {
+            List<MovieItem> movieItems = new ArrayList<>();
+            cursor.moveToFirst();
+            do {
+                String oriTitle = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_ORIGINAL_TITLE));
+                String title = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_TITLE));
+                String popularity = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_POPULARITY));
+                String voteAverage = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_VOTE_AVERAGE));
+                String releaseDate = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_RELEASE_DATE));
+                String path = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_POSTER_PATH));
+
+                MovieItem item = new MovieItem(oriTitle, title, popularity, voteAverage);
+                item.setPoster_path(path);
+                item.setRelease_date(releaseDate);
+                movieItems.add(item);
+            } while (cursor.moveToNext());
+
+            /*Reset List Before populating*/
+            movieViewAdapter.resetList();
+            populateList(movieItems);
+        }
+
     }
 
 }

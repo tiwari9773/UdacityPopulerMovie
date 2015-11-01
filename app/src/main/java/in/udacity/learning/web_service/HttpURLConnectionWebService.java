@@ -22,11 +22,15 @@ import in.udacity.learning.populermovie.app.activities.MyApplication;
  */
 public class HttpURLConnectionWebService {
 
+    private String TAG = HttpURLConnectionWebService.class.getName();
     private String sort_by = "popularity.desc"; //default Value
     private String primary_release_year = "2015";
     private String requestedPage = "1";
 
-    public HttpURLConnectionWebService(String sort_by,String primary_release_year,String requestedPage) {
+    public HttpURLConnectionWebService() {
+    }
+
+    public HttpURLConnectionWebService(String sort_by, String primary_release_year, String requestedPage) {
         this.sort_by = sort_by;
         this.primary_release_year = primary_release_year;
         this.requestedPage = requestedPage;
@@ -44,6 +48,63 @@ public class HttpURLConnectionWebService {
                     .appendQueryParameter(WebServiceURL.PRIMARY_RELEASE_YEAR, primary_release_year)
                     .appendQueryParameter(WebServiceURL.SORT_BY, sort_by)
                     .appendQueryParameter(WebServiceURL.PAGES, requestedPage).build();
+            URL url = new URL(builtUri.toString());
+
+                /* */
+            if (AppConstant.DEVELOPER)
+                Log.v(TAG, builtUri.toString());
+
+            httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.connect();
+
+            InputStream inputStream = httpURLConnection.getInputStream();
+            StringBuffer stringBuffer = new StringBuffer();
+
+            if (inputStream == null) {
+                return null;
+            }
+
+            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String line = "";
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuffer.append(line + " " + "\\n");
+            }
+
+            if (stringBuffer.length() == 0) {
+                return null;
+            }
+
+            return stringBuffer.toString();
+        } catch (MalformedURLException e) {
+            L.lToast(MyApplication.getInstance().getContext(), e.toString());
+            //e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (httpURLConnection != null)
+                httpURLConnection.disconnect();
+
+            if (bufferedReader != null)
+                try {
+                    bufferedReader.close();
+                } catch (final Exception e) {
+                    L.lToast(MyApplication.getInstance().getContext(), e.toString());
+                }
+        }
+        return null;
+    }
+
+    /* Tag is only for marking which class is calling this method*/
+    public String getTrailerJSON(String movieId) {
+        HttpURLConnection httpURLConnection = null;
+        BufferedReader bufferedReader = null;
+         /* Take an URL Object*/
+        try {
+
+            Uri builtUri = Uri.parse(WebServiceURL.baseURLTrailer).buildUpon().appendPath(movieId).appendPath("videos")
+                    .appendQueryParameter(WebServiceURL.API_KEY, BuildConfig.OPEN_MOVIE_API_KEY)
+                    .build();
             URL url = new URL(builtUri.toString());
 
                 /* */

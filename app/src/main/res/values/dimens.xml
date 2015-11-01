@@ -12,4 +12,8 @@
     <dimen name="movie_thumbnail_dimen">200dp</dimen>
     <dimen name="movie_poster_height">250dp</dimen>
 
+    <dimen name="movie_trailer_height">120dp</dimen>
+    <dimen name="movie_cardview_height">160dp</dimen>
+    <dimen name="movie_trailer_width">120dp</dimen>
+    <dimen name="padding_four">4dp</dimen>
 </resources>

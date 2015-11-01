@@ -30,13 +30,6 @@ public class NetWorkInfoUtility {
     private boolean isWifiEnable = false;
     private boolean isMobileNetworkAvailable =false;
 
-    public boolean isNetworkAvailable() {
-        return isNetworkAvailable;
-    }
-
-    public void setIsNetworkAvailable(boolean isNetworkAvailable) {
-        this.isNetworkAvailable = isNetworkAvailable;
-    }
 
     public boolean isNetWorkAvailableNow(Context context)
     {
@@ -47,9 +40,9 @@ public class NetWorkInfoUtility {
 
         if(isWifiEnable() || isMobileNetworkAvailable())
         {
-            setIsNetworkAvailable(true);
+            isNetworkAvailable = true;
         }
 
-        return  isNetworkAvailable();
+        return  isNetworkAvailable;
     }
 }

@@ -7,8 +7,11 @@ public class WebServiceURL {
 
 
     public static String baseURL = "https://api.themoviedb.org/3/discover/movie?";
-    public static String baseURLThumbnail = "http://image.tmdb.org/t/p/w154/";
-    public static String baseURLPoster = "http://image.tmdb.org/t/p/w185/";
+    public static String baseURLTrailer = "https://api.themoviedb.org/3/movie/";
+    public static String baseURLThumbnail = "http://image.tmdb.org/t/p/w185/";
+    public static String baseURLPoster = "http://image.tmdb.org/t/p/w342/";
+    public static String youTubeBaseUrl = "https://www.youtube.com/watch?v=";
+
 
     ///discover/movie?primary_release_date.gte=2014-09-15&primary_release_date.lte=2014-10-22
     //discover/movie?sort_by=popularity.desc

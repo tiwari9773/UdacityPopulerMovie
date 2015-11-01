@@ -50,6 +50,7 @@ public class MovieContract {
         public static String COL_OVERVIEW = "overview";
         public static String COL_RELEASE_DATE = "release_date";
         public static String COL_POSTER_PATH = "poster_path";
+        public static String COL_THUMBNAIL_PATH = "poster_path";
         public static String COL_POPULARITY = "popularity";
         public static String COL_TITLE = "title";
         public static String COL_VIDEO = "video";
@@ -66,6 +67,7 @@ public class MovieContract {
                 + COL_TITLE + T.TYPE_TEXT + T.NOT_NULL + T.SEP_COMMA
                 + COL_OVERVIEW + T.TYPE_TEXT + T.NOT_NULL + T.SEP_COMMA
                 + COL_POSTER_PATH + T.TYPE_TEXT + T.NOT_NULL + T.SEP_COMMA
+                + COL_THUMBNAIL_PATH + T.TYPE_TEXT + T.NOT_NULL + T.SEP_COMMA
                 + COL_POPULARITY + T.TYPE_REAL + T.NOT_NULL + T.SEP_COMMA
                 + COL_VOTE_AVERAGE + T.TYPE_REAL + T.NOT_NULL + T.SEP_COMMA
                 + COL_VOTE_COUNT + T.TYPE_REAL + T.NOT_NULL + T.SEP_COMMA

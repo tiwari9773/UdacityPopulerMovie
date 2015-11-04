@@ -211,12 +211,6 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
     class FetchTrailerList extends AsyncTask<String, String, List<TrailerItem>> {
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //progressLoading();
-        }
-
-        @Override
         protected List<TrailerItem> doInBackground(String... params) {
             String moviewId = params[0];
             String path = params[1];

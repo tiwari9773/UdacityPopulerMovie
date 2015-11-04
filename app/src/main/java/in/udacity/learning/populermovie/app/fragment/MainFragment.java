@@ -1,13 +1,18 @@
 package in.udacity.learning.populermovie.app.fragment;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -60,8 +66,14 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
     * and create lag in animation of transition*/
     public static Drawable drawable;
 
+    /*Empty View in RecyclerView*/
+    private TextView tvEmptyTextView;
+
     /*Endless scroll listener*/
     private RecycleEndlessScrollListener recycleEndlessScrollListener;
+
+    /*Network Change listente*/
+    private NetWorkChangeListener netWorkChangeListener;
 
     /*Make first item selected first time*/
     private boolean isFirstSelected = false;
@@ -100,16 +112,17 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         return view;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        //for second time when user press back button we should not load again
-        if (mItems == null || mItems.size() == 0)
-            refreshNewMovieList(sort_order);
-    }
-
     private void initialise(View view) {
+
+        /* Empty View When no internet is present*/
+        tvEmptyTextView = (TextView) view.findViewById(R.id.tv_empty_view);
+
+        netWorkChangeListener = new NetWorkChangeListener();
+        IntentFilter intentfilter = new IntentFilter();
+        intentfilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+
+        /*Local Broadcast manager For network notification*/
+        getActivity().registerReceiver(netWorkChangeListener, intentfilter);
 
         recycleEndlessScrollListener = new RecycleEndlessScrollListener() {
             @Override
@@ -138,6 +151,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
 
         /*On Scroll Listener*/
         recycleView.addOnScrollListener(recycleEndlessScrollListener);
+
     }
 
     @Override
@@ -162,7 +176,6 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
 
                 /*If new Order to sort then it is acceptable to call webservice*/
                 sort_order = sort_populer;
-                refreshNewMovieList(sort_order);
                 break;
 
             case R.id.action_sort_by_rating:
@@ -172,16 +185,17 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                 }
 
                 sort_order = sort_rating;
-                refreshNewMovieList(sort_order);
+                break;
             case R.id.action_favourite:
                 if (sort_order.equals(sort_favourite)) {
                     isSortingOrderChange = false;
                     break;
                 }
                 sort_order = sort_favourite;
-                refreshNewMovieList(sort_order);
+                break;
         }
-
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(sort_order);
+        refreshNewMovieList(sort_order);
         return super.onOptionsItemSelected(item);
     }
 
@@ -194,13 +208,31 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
             if (cur != null && cur.getCount() > 0)
                 parseCursor(cur);
         } else {
-            /*For Progress Bar*/
-            if (mItems != null)
-                mItems.add(null);
+
+            if (new NetWorkInfoUtility().isNetWorkAvailableNow(getContext())) {
+               /*Remove Empty View*/
+                tvEmptyTextView.setVisibility(View.GONE);
+
+               /*For Progress Bar*/
+                if (mItems != null)
+                    mItems.add(null);
 
             /* By default considering first page*/
-            int current_page = 1;
-            updateMovieList(sort_order, current_page);
+                int current_page = 1;
+                updateMovieList(sort_order, current_page);
+            } else {
+                netWorkEmptyView();
+            }
+        }
+    }
+
+    /*Automatically Adjust aboutview*/
+    private void netWorkEmptyView() {
+        if (new NetWorkInfoUtility().isNetWorkAvailableNow(getContext())) {
+            tvEmptyTextView.setVisibility(View.GONE);
+        } else {
+            /*Add Empty View*/
+            tvEmptyTextView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -282,6 +314,8 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
              /*Make first item selected first time*/
             if (!isFirstSelected) {
                 isFirstSelected = true;
+                Intent in = new Intent(AppConstant.FILTER_OBJECT);
+                in.putExtra(AppConstant.OBJECT, mItems.get(0));
                 getActivity().sendBroadcast(new Intent(AppConstant.FILTER_OBJECT));
             }
 
@@ -321,5 +355,28 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         }
 
     }
+
+    public class NetWorkChangeListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(getActivity(), "NetWork Change", Toast.LENGTH_SHORT).show();
+
+            netWorkEmptyView();
+
+            if (new NetWorkInfoUtility().isNetWorkAvailableNow(getContext())) {
+                //for second time when user press back button we should not load again
+                if (mItems == null || mItems.size() == 0)
+                    refreshNewMovieList(sort_order);
+            }
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        /*Local Broadcast manager*/
+        getActivity().unregisterReceiver(netWorkChangeListener);
+    }
+
 
 }

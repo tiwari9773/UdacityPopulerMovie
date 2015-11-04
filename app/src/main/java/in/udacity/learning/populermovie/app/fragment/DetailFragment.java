@@ -2,9 +2,11 @@ package in.udacity.learning.populermovie.app.fragment;
 
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -28,6 +30,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -69,16 +72,38 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
 
     private ShareActionProvider mShareActionProvider;
 
+    private MyBroadcastReciver receiver;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         setHasOptionsMenu(true);
     }
 
+    public class MyBroadcastReciver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(getContext(), "completed Load of List", Toast.LENGTH_SHORT).show();
+            item = intent.getParcelableExtra(AppConstant.OBJECT);
+            initialise(view);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (receiver != null)
+            getActivity().unregisterReceiver(receiver);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_movie_detail, container, false);
+
+        receiver = new MyBroadcastReciver();
+        getActivity().registerReceiver(receiver, new IntentFilter(AppConstant.FILTER_OBJECT));
 
         Bundle b = getArguments();
         if (b != null) {
@@ -92,83 +117,84 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
     private void initialise(View view) {
 
         final ImageView ivBanner = (ImageView) view.findViewById(R.id.iv_movie_poster);
+        if (item != null) {
+            TextView tvTitle = (TextView) view.findViewById(R.id.tv_original_title);
+            tvTitle.setText(item.getTitle());
 
-        TextView tvTitle = (TextView) view.findViewById(R.id.tv_original_title);
-        tvTitle.setText(item.getTitle());
+            TextView tvOverview = (TextView) view.findViewById(R.id.tv_overview);
+            tvOverview.setText(item.getOverview());
 
-        TextView tvOverview = (TextView) view.findViewById(R.id.tv_overview);
-        tvOverview.setText(item.getOverview());
+            TextView tvLanguage = (TextView) view.findViewById(R.id.tv_language);
+            tvLanguage.setText(item.getOriginal_language());
 
-        TextView tvLanguage = (TextView) view.findViewById(R.id.tv_language);
-        tvLanguage.setText(item.getOriginal_language());
-
-        TextView tvReleaseDate = (TextView) view.findViewById(R.id.tv_release_date);
-        tvReleaseDate.setText(item.getRelease_date());
+            TextView tvReleaseDate = (TextView) view.findViewById(R.id.tv_release_date);
+            tvReleaseDate.setText(item.getRelease_date());
 
         /*Set Rating bar out of Five*/
-        RatingBar ratingBar = (RatingBar) view.findViewById(R.id.rb_ratingbar);
-        float ratingval = Float.parseFloat(item.getVote_average()) / 2;
-        ratingBar.setRating(ratingval);
+            RatingBar ratingBar = (RatingBar) view.findViewById(R.id.rb_ratingbar);
+            float ratingval = Float.parseFloat(item.getVote_average()) / 2;
+            ratingBar.setRating(ratingval);
 
-        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                try {
-                    FileOutputStream fileOutputStream = getActivity().openFileOutput(item.getId() + ".jpg", getActivity().MODE_PRIVATE);
+                    try {
+                        FileOutputStream fileOutputStream = getActivity().openFileOutput(item.getId() + ".jpg", getActivity().MODE_PRIVATE);
 
-                    Bitmap bitmap = convertToBitMap(ivBanner.getDrawable(), ivBanner.getWidth(), ivBanner.getHeight());
-                    //Bitmap bitmap = ((BitmapDrawable) ivBanner.getDrawable()).getBitmap();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fileOutputStream);
-                    File file = getActivity().getFileStreamPath(item.getId() + ".jpg");
-                    String localPath = file.getAbsolutePath();
+                        Bitmap bitmap = convertToBitMap(ivBanner.getDrawable(), ivBanner.getWidth(), ivBanner.getHeight());
+                        //Bitmap bitmap = ((BitmapDrawable) ivBanner.getDrawable()).getBitmap();
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fileOutputStream);
+                        File file = getActivity().getFileStreamPath(item.getId() + ".jpg");
+                        String localPath = file.getAbsolutePath();
 
-                    item.setPoster_path(localPath);
+                        item.setPoster_path(localPath);
 
                     /*House Keeping Operation*/
-                    fileOutputStream.flush();
-                    fileOutputStream.close();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                ContentValues cv = new ContentValues();
-                cv.put(MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID, item.getId());
-                cv.put(MovieContract.FavouriteMovie.COL_RELEASE_DATE, item.getRelease_date());
-                cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_LANGUAGE, item.getOriginal_language());
-                cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_TITLE, item.getOriginal_title());
-                cv.put(MovieContract.FavouriteMovie.COL_OVERVIEW, item.getOverview());
-                cv.put(MovieContract.FavouriteMovie.COL_POSTER_PATH, item.getPoster_path());
-                cv.put(MovieContract.FavouriteMovie.COL_THUMBNAIL_PATH, item.getPoster_path());
-                cv.put(MovieContract.FavouriteMovie.COL_TITLE, item.getTitle());
-                cv.put(MovieContract.FavouriteMovie.COL_POPULARITY, item.getPopularity());
-                cv.put(MovieContract.FavouriteMovie.COL_VOTE_AVERAGE, item.getVote_average());
-                cv.put(MovieContract.FavouriteMovie.COL_VOTE_COUNT, item.getVote_count());
+                        fileOutputStream.flush();
+                        fileOutputStream.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    ContentValues cv = new ContentValues();
+                    cv.put(MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID, item.getId());
+                    cv.put(MovieContract.FavouriteMovie.COL_RELEASE_DATE, item.getRelease_date());
+                    cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_LANGUAGE, item.getOriginal_language());
+                    cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_TITLE, item.getOriginal_title());
+                    cv.put(MovieContract.FavouriteMovie.COL_OVERVIEW, item.getOverview());
+                    cv.put(MovieContract.FavouriteMovie.COL_POSTER_PATH, item.getPoster_path());
+                    cv.put(MovieContract.FavouriteMovie.COL_THUMBNAIL_PATH, item.getPoster_path());
+                    cv.put(MovieContract.FavouriteMovie.COL_TITLE, item.getTitle());
+                    cv.put(MovieContract.FavouriteMovie.COL_POPULARITY, item.getPopularity());
+                    cv.put(MovieContract.FavouriteMovie.COL_VOTE_AVERAGE, item.getVote_average());
+                    cv.put(MovieContract.FavouriteMovie.COL_VOTE_COUNT, item.getVote_count());
 
-                Uri uri = getActivity().getContentResolver().insert(MovieContract.FavouriteMovie.CONTENT_URI, cv);
-                Log.d(TAG, "onClick " + uri.toString() + " Values " + cv.toString());
-            }
-        });
+                    Uri uri = getActivity().getContentResolver().insert(MovieContract.FavouriteMovie.CONTENT_URI, cv);
+                    Log.d(TAG, "onClick " + uri.toString() + " Values " + cv.toString());
+                }
+            });
 
 
          /* Check Trailer Values and link from server*/
-        if (new NetWorkInfoUtility().isNetWorkAvailableNow(getActivity())) {
-            new FetchTrailerList().execute(new String[]{item.getId(), item.getPoster_path()});
-            new FetchReviewList().execute(new String[]{item.getId()});
-        }
+            if (new NetWorkInfoUtility().isNetWorkAvailableNow(getActivity())) {
+                new FetchTrailerList().execute(new String[]{item.getId(), item.getPoster_path()});
+                new FetchReviewList().execute(new String[]{item.getId()});
+            }
 
-        //Update Image with Big Image
+            //Update Image with Big Image
         /* Change Width of poster so that it should not look bad*/
 
-        item.setPoster_path(item.getPoster_path().replace("w185", "w342"));
-        Glide.with(this)
-                .load(item.getPoster_path())
-                .centerCrop()
-                .placeholder(MainFragment.drawable)
-                .crossFade()
-                .into(ivBanner);
+            item.setPoster_path(item.getPoster_path().replace("w185", "w342"));
+            Glide.with(this)
+                    .load(item.getPoster_path())
+                    .centerCrop()
+                    .placeholder(MainFragment.drawable)
+                    .crossFade()
+                    .into(ivBanner);
+        }
 
     }
 

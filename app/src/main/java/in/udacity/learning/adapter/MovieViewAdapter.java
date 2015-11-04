@@ -22,7 +22,7 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     private List<MovieItem> lsItem;
     private OnMovieItemClickListener onMovieItemClickListener;
-    private final int EMPTY_VIEW = -1;
+    private final int EMPTY_VIEW = 2;
     private final int PROGRESS_VIEW = 1;
 
     public MovieViewAdapter(List<MovieItem> lsItem, OnMovieItemClickListener onMovieItemClickListener) {
@@ -38,16 +38,19 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_progress_view, viewGroup, false);
             ProgressViewHolder movieHolder = new ProgressViewHolder(view);
             return movieHolder;
-        } else if (viewType == EMPTY_VIEW) {
-            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.empty_view, viewGroup, false);
-            EmptyViewHolder evh = new EmptyViewHolder(view);
-            return evh;
-
-        } else {
+        }
+        else {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_movie_list_main, viewGroup, false);
             MovieHolder movieHolder = new MovieHolder(view);
             return movieHolder;
         }
+
+        //        else if (viewType == EMPTY_VIEW) {
+//            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.empty_view, viewGroup, false);
+//            EmptyViewHolder evh = new EmptyViewHolder(view);
+//            return evh;
+//
+//        }
     }
 
     @Override
@@ -68,13 +71,13 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public int getItemCount() {
-        return lsItem.size() == 0 ? 1 : lsItem.size();
+        return lsItem.size() == 0 ? 0 : lsItem.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (lsItem.size() == 0)
-            return EMPTY_VIEW;
+//        if (lsItem.size() == 0)
+//            return EMPTY_VIEW;
         /*null Indicate Loader*/
         if (lsItem.get(position) == null)
             return PROGRESS_VIEW;
@@ -124,6 +127,4 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             super(itemView);
         }
     }
-
-
 }

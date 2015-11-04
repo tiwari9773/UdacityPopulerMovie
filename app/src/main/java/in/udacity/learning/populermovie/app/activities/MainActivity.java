@@ -5,8 +5,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -27,8 +29,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
     private boolean mTwoPane = false;
 
     private static final String DETAIL_FRAGMENT_TAG = "DFTAG";
-
-    private MyBroadcastReciver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,20 +54,17 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.detail_container, new DetailFragment(), DETAIL_FRAGMENT_TAG)
                         .commit();
-
-                receiver = new MyBroadcastReciver();
-                registerReceiver(receiver, new IntentFilter(AppConstant.FILTER_OBJECT));
             }
         } else {
             mTwoPane = false;
             getSupportActionBar().setElevation(0f);
         }
+
     }
 
     @Override
     public void onItemSelected(MovieItem item, View view) {
         if (mTwoPane) {
-
             if (AppConstant.DEBUG)
                 Toast.makeText(MainActivity.this, item.getTitle() + "", Toast.LENGTH_SHORT).show();
             Bundle b = new Bundle();
@@ -94,18 +91,4 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
         }
     }
 
-    public class MyBroadcastReciver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Toast.makeText(MainActivity.this, "completed Load of List", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (receiver != null)
-            unregisterReceiver(receiver);
-    }
 }

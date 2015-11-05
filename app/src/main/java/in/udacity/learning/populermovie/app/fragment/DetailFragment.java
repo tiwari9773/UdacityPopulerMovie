@@ -166,7 +166,7 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
 
                         /*Remove fraom database*/
                         Uri uri = MovieContract.FavouriteMovie.buildFavouriteUriWithServer(Integer.parseInt(item.getServerId()));
-                        int i = getActivity().getBaseContext().getContentResolver().delete(uri, null, null);
+                        int i = getActivity().getContentResolver().delete(uri, null, null);
                         if (i > 0) {
                             if (AppConstant.DEBUG)
                                 Toast.makeText(getActivity(), i + " Deleted", Toast.LENGTH_SHORT).show();
@@ -175,18 +175,18 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
                             /*Change Icon also */
                         fab.setImageDrawable(getActivity().getResources().getDrawable(R.mipmap.ic_favorite_border_black_18dp));
 
-
                     } else {
                         try {
 
                            /*Change Icon also */
                             fab.setImageDrawable(getActivity().getResources().getDrawable(R.mipmap.ic_favorite_black_18dp));
+                            isAlreadyFavourated = true;
 
-                            FileOutputStream fileOutputStream = getActivity().openFileOutput(item.getId() + ".jpg", getActivity().MODE_PRIVATE);
+                            FileOutputStream fileOutputStream = getActivity().openFileOutput(item.getServerId() + ".jpg", getActivity().MODE_PRIVATE);
                             Bitmap bitmap = convertToBitMap(ivBanner.getDrawable(), ivBanner.getWidth(), ivBanner.getHeight());
                             //Bitmap bitmap = ((BitmapDrawable) ivBanner.getDrawable()).getBitmap();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fileOutputStream);
-                            File file = getActivity().getFileStreamPath(item.getId() + ".jpg");
+                            File file = getActivity().getFileStreamPath(item.getServerId() + ".jpg");
                             String localPath = file.getAbsolutePath();
 
                             item.setPoster_path(localPath);
@@ -233,7 +233,6 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
 
             //Update Image with Big Image
         /* Change Width of poster so that it should not look bad*/
-
             item.setPoster_path(item.getPoster_path().replace("w185", "w342"));
             Glide.with(this)
                     .load(item.getPoster_path())
@@ -361,7 +360,7 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         shareIntent.setType("text/plain");
         if (item != null)
-            shareIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle());
+            shareIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle()+"\n"+item.getOverview());
         return shareIntent;
     }
 

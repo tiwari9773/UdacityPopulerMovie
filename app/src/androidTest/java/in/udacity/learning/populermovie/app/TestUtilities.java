@@ -47,11 +47,15 @@ public class TestUtilities extends AndroidTestCase {
         cv.put(MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID, 1234);
         cv.put(MovieContract.FavouriteMovie.COL_RELEASE_DATE, 1234);
         cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_LANGUAGE, "test");
+
         cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_TITLE, "test");
-        cv.put(MovieContract.FavouriteMovie.COL_OVERVIEW, "test");
-        cv.put(MovieContract.FavouriteMovie.COL_POSTER_PATH, "test");
         cv.put(MovieContract.FavouriteMovie.COL_TITLE, "test");
+        cv.put(MovieContract.FavouriteMovie.COL_OVERVIEW, "test");
+
+        cv.put(MovieContract.FavouriteMovie.COL_POSTER_PATH, "test");
+        cv.put(MovieContract.FavouriteMovie.COL_THUMBNAIL_PATH, "test");
         cv.put(MovieContract.FavouriteMovie.COL_POPULARITY, 1234);
+
         cv.put(MovieContract.FavouriteMovie.COL_VOTE_AVERAGE, 12);
         cv.put(MovieContract.FavouriteMovie.COL_VOTE_COUNT, 12);
 //        cv.put(MovieContract.FavouriteMovie.COL_VIDEO, "test");

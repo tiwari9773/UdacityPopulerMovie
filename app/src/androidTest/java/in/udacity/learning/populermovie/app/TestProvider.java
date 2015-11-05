@@ -114,6 +114,12 @@ public class TestProvider extends AndroidTestCase {
         // vnd.android.cursor.dir/in.udacity.learning.populermovie.app/favourite/1
         assertEquals("Error: the MovieFavourite CONTENT_URI should return MovieFavourite.CONTENT_ITEM_TYPE",
                 MovieContract.FavouriteMovie.CONTENT_ITEM_TYPE, type);
+//content://in.udacity.learning.populermovie.app/favourites/movie_server_id/1
+        Uri uri = MovieContract.FavouriteMovie.buildFavouriteUriWithServer(id);
+        type = mContext.getContentResolver().getType(uri);
+        // vnd.android.cursor.dir/in.udacity.learning.populermovie.app/favourite/1
+        assertEquals("Error: the MovieFavourite CONTENT_URI should return MovieFavourite.CONTENT_ITEM_TYPE",
+                MovieContract.FavouriteMovie.CONTENT_ITEM_TYPE, type);
     }
 
     /*Test Value is getting properly inserted or not */
@@ -131,6 +137,7 @@ public class TestProvider extends AndroidTestCase {
         uri = mContext.getContentResolver().insert(uri, cv);
         // vnd.android.cursor.dir/in.udacity.learning.populermovie.app/favourite
         String type = mContext.getContentResolver().getType(uri);
+
         // vnd.android.cursor.dir/in.udacity.learning.populermovie.app/favourite/1
         assertEquals("Error: the MovieFavourite CONTENT_URI should return MovieFavourite.CONTENT_ITEM_TYPE",
                 MovieContract.FavouriteMovie.CONTENT_ITEM_TYPE, type);
@@ -142,7 +149,7 @@ public class TestProvider extends AndroidTestCase {
     }
 
     public void testBasicReadQuery() {
-
+        deleteAllRecords();
         /* Insert New Record*/
         ContentValues cv = TestUtilities.createFavouriteValues();
         testInsertDatabase();
@@ -152,9 +159,15 @@ public class TestProvider extends AndroidTestCase {
         assertTrue("Cursor does not contain any value", cur.moveToFirst());
 
         TestUtilities.validateCursor("Not equal what inserted", cur, cv);
+
+        /* Check individual record*/
+        cur = mContext.getContentResolver().query(MovieContract.FavouriteMovie.buildFavouriteUriWithServer(1234), null, null, null, null);
+        assertTrue("Specific id Cursor is null , Read Test Failed", null != cur);
+        assertTrue("Specific id Cursor does not contain any value", cur.moveToFirst());
     }
 
     public void testDeleteQuery() {
+
         /* Insert New Record*/
         int id = testInsertDatabase();
 

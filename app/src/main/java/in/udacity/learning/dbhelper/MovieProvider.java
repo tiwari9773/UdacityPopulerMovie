@@ -21,15 +21,17 @@ public class MovieProvider extends ContentProvider {
     public static final int FAVOURITE = 1;
     public static final int FAVOURITE_BY_ID = 2;
     public static final int FAVOURITE_BY_SERVER_ID = 3;
-    public static final int FAVOURITE_IMAGE = 3;
+    public static final int FAVOURITE_IMAGE = 4;
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String content_authority = MovieContract.CONTENT_AUTHORITY;
 
         uriMatcher.addURI(content_authority, MovieContract.PATH_FAVOURITE_MOVIE, FAVOURITE);
+
+        /*Problem: If I am interchanging Position then This is crashing , Why ?? and What is happening inside.*/
+        uriMatcher.addURI(content_authority, MovieContract.PATH_FAVOURITE_MOVIE + "/" + MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID + "/*", FAVOURITE_BY_SERVER_ID);
         uriMatcher.addURI(content_authority, MovieContract.PATH_FAVOURITE_MOVIE + "/*", FAVOURITE_BY_ID);
-        uriMatcher.addURI(content_authority, MovieContract.PATH_FAVOURITE_MOVIE + "/"+MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID+"/*", FAVOURITE_BY_ID);
 
         return uriMatcher;
     }
@@ -48,7 +50,8 @@ public class MovieProvider extends ContentProvider {
         // Here's the switch statement that, given a URI, will determine what kind of request it is,
         // and query the database accordingly.
         Cursor resCursor;
-        switch (sUriMatcher.match(uri)) {
+        int matchId = sUriMatcher.match(uri);
+        switch (matchId) {
             case FAVOURITE:
                 resCursor = mOpenHelper.getReadableDatabase().query(
                         MovieContract.FavouriteMovie.TABLE_NAME,

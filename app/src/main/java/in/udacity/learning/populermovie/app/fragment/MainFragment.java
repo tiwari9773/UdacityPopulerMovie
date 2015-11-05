@@ -183,6 +183,9 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Popular Movie");
                 /*If new Order to sort then it is acceptable to call webservice*/
                 sort_order = sort_populer;
+
+                /*Now list is new and completely refresh, so application make firstone as Selected*/
+                isFirstSelected = false;
                 break;
 
             case R.id.action_sort_by_rating:
@@ -193,6 +196,9 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
 
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Rated Movie");
                 sort_order = sort_rating;
+
+                /*Now list is new and completely refresh, so application make firstone as Selected*/
+                isFirstSelected = false;
                 break;
             case R.id.action_favourite:
                 if (sort_order.equals(sort_favourite)) {
@@ -200,7 +206,10 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                     break;
                 }
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("My Favourite");
+
                 sort_order = sort_favourite;
+                /*Now list is new and completely refresh, so application make firstone as Selected*/
+                isFirstSelected = false;
                 break;
         }
 
@@ -256,7 +265,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         }
     }
 
-    /*Automatically Adjust aboutview*/
+    /*Automatically Adjust about-view*/
     private void netWorkEmptyView() {
         if (new NetWorkInfoUtility().isNetWorkAvailableNow(getContext())) {
             tvEmptyTextView.setVisibility(View.GONE);
@@ -314,6 +323,12 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
             if (AppConstant.DEBUG)
                 Toast.makeText(getActivity(), mItems.size() + "Before Remove", Toast.LENGTH_SHORT).show();
 
+            if (mItems != null && mItems.size() > 0) {
+                //remove progress item
+                mItems.remove(mItems.size() - 1);
+                movieViewAdapter.notifyItemRemoved(mItems.size());
+            }
+
             if (movieItems != null) {
 
                 /*set Total Pages to scroll*/
@@ -321,10 +336,6 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                     recycleEndlessScrollListener.setMaxPages(Integer.parseInt(MovieItem.getTotal_pages()));
 
                 if (mItems != null) {
-                    //remove progress item
-                    mItems.remove(mItems.size() - 1);
-                    movieViewAdapter.notifyItemRemoved(mItems.size());
-
                     if (AppConstant.DEBUG)
                         Toast.makeText(getActivity(), mItems.size() + "AfterRemove", Toast.LENGTH_SHORT).show();
 
@@ -333,7 +344,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
             }
 
              /*Make first item selected first time*/
-            if (!isFirstSelected && mItems.size() > 0) {
+            if (!isFirstSelected && mItems != null && mItems.get(0) != null && mItems.size() > 0) {
                 isFirstSelected = true;
                 Intent in = new Intent(AppConstant.FILTER_OBJECT);
                 in.putExtra(AppConstant.OBJECT, mItems.get(0));
@@ -407,6 +418,5 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         /*Local Broadcast manager*/
         getActivity().unregisterReceiver(netWorkChangeListener);
     }
-
 
 }

@@ -60,15 +60,19 @@ public class MovieContract {
         public static final String SQL_CREATE = T.CREATE_TABLE + TABLE_NAME
                 + T.OPEN_BRACE
                 + _ID + T.TYPE_INTEGER + T.PRIMARY_KEY + T.AUTO_INCREMENT + T.SEP_COMMA
+
                 + COL_MOVIE_SERVER_ID + T.TYPE_INTEGER + T.NOT_NULL + T.SEP_COMMA
                 + COL_RELEASE_DATE + T.TYPE_INTEGER + T.NOT_NULL + T.SEP_COMMA
                 + COL_ORIGINAL_LANGUAGE + T.TYPE_TEXT + T.NOT_NULL + T.SEP_COMMA
+
                 + COL_ORIGINAL_TITLE + T.TYPE_TEXT + T.NOT_NULL + T.SEP_COMMA
                 + COL_TITLE + T.TYPE_TEXT + T.NOT_NULL + T.SEP_COMMA
                 + COL_OVERVIEW + T.TYPE_TEXT + T.NOT_NULL + T.SEP_COMMA
+
                 + COL_POSTER_PATH + T.TYPE_TEXT + T.NOT_NULL + T.SEP_COMMA
                 + COL_THUMBNAIL_PATH + T.TYPE_TEXT + T.NOT_NULL + T.SEP_COMMA
                 + COL_POPULARITY + T.TYPE_REAL + T.NOT_NULL + T.SEP_COMMA
+
                 + COL_VOTE_AVERAGE + T.TYPE_REAL + T.NOT_NULL + T.SEP_COMMA
                 + COL_VOTE_COUNT + T.TYPE_REAL + T.NOT_NULL + T.SEP_COMMA
                 + T.UNIQUE + T.OPEN_BRACE + COL_MOVIE_SERVER_ID + T.CLOSE_BRACE + T.ON_CONFLICT_REPLACE
@@ -81,9 +85,9 @@ public class MovieContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        /*TO selelct movie with Id*/
-        public static Uri buildFavouriteUriWithServer(long id) {
-            return CONTENT_URI.buildUpon().appendPath(COL_MOVIE_SERVER_ID).appendPath(String.valueOf(id)).build();
+        /*TO selelct movie with server_id*/
+        public static Uri buildFavouriteUriWithServer(long serverId) {
+            return CONTENT_URI.buildUpon().appendPath(COL_MOVIE_SERVER_ID).appendPath(String.valueOf(serverId)).build();
         }
     }
 

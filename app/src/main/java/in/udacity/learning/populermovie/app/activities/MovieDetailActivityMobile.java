@@ -74,6 +74,9 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /*Problem: In this page UI gets little bit scrolled automatically and overview hide
+        * How to find problem and solve*/
         setContentView(R.layout.activity_detail);
 
         initialise(savedInstanceState);
@@ -96,7 +99,7 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle());
+        shareIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle()+"\n"+item.getOverview());
         return shareIntent;
     }
 
@@ -131,7 +134,6 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
             float ratingval = Float.parseFloat(item.getVote_average()) / 2;
             ratingBar.setRating(ratingval);
 
-
             final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
             /*Is movie already Favourite*/
@@ -155,7 +157,7 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
 
                         /*Remove fraom database*/
                         Uri uri = MovieContract.FavouriteMovie.buildFavouriteUriWithServer(Integer.parseInt(item.getServerId()));
-                        int i = getBaseContext().getContentResolver().delete(uri, null, null);
+                        int i = getContentResolver().delete(uri, null, null);
                         if (i > 0) {
                             if (AppConstant.DEBUG)
                                 Toast.makeText(MovieDetailActivityMobile.this, i + " Deleted", Toast.LENGTH_SHORT).show();
@@ -167,12 +169,16 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
 
                     } else {
                         try {
-                            FileOutputStream fileOutputStream = openFileOutput(item.getId() + ".jpg", MODE_PRIVATE);
+                             /*Change Icon also */
+                            fab.setImageDrawable(getResources().getDrawable(R.mipmap.ic_favorite_black_18dp));
+                            isAlreadyFavourated = true;
+
+                            FileOutputStream fileOutputStream = openFileOutput(item.getServerId() + ".jpg", MODE_PRIVATE);
 
                             Bitmap bitmap = convertToBitMap(ivBanner.getDrawable(), ivBanner.getWidth(), ivBanner.getHeight());
                             //Bitmap bitmap = ((BitmapDrawable) ivBanner.getDrawable()).getBitmap();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fileOutputStream);
-                            File file = getFileStreamPath(item.getId() + ".jpg");
+                            File file = getFileStreamPath(item.getServerId() + ".jpg");
                             String localPath = file.getAbsolutePath();
 
                             item.setPoster_path(localPath);
@@ -186,7 +192,7 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
                             e.printStackTrace();
                         }
                         ContentValues cv = new ContentValues();
-                        cv.put(MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID, item.getId());
+                        cv.put(MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID, item.getServerId());
                         cv.put(MovieContract.FavouriteMovie.COL_RELEASE_DATE, item.getRelease_date());
                         cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_LANGUAGE, item.getOriginal_language());
                         cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_TITLE, item.getOriginal_title());
@@ -207,8 +213,8 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
 
          /* Check Trailer Values and link from server*/
             if (new NetWorkInfoUtility().isNetWorkAvailableNow(this)) {
-                new FetchTrailerList().execute(new String[]{item.getId(), item.getPoster_path()});
-                new FetchReviewList().execute(new String[]{item.getId()});
+                new FetchTrailerList().execute(new String[]{item.getServerId(), item.getPoster_path()});
+                new FetchReviewList().execute(new String[]{item.getServerId()});
             }
 
             //Update Image with Big Image

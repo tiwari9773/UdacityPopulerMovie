@@ -127,15 +127,21 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         recycleEndlessScrollListener = new RecycleEndlessScrollListener() {
             @Override
             public void onLoadMore(int current_page) {
-                //add progress item
-                if (mItems != null) {
-                    mItems.add(null);
-                    if (AppConstant.DEBUG)
-                        Toast.makeText(getActivity(), mItems.size() + "Added Loaded", Toast.LENGTH_SHORT).show();
-                }
+                /*If Items are not sorted by favourite then only call server side else no need to try
+                * because value will come from saved location*/
+                if (!sort_order.equals(sort_favourite)) {
+                    //add progress item and If list already contains one null that means Loading progress bar
+                    // is already added so no need to add again if we remove !mItem.contains(null) it
+                    // add progress bar multiple times.
+                    if (mItems != null && !mItems.contains(null)) {
+                        mItems.add(null);
+                        if (AppConstant.DEBUG)
+                            Toast.makeText(getActivity(), mItems.size() + "Loaded", Toast.LENGTH_SHORT).show();
+                    }
 
-                movieViewAdapter.notifyItemInserted(mItems.size());
-                updateMovieList(sort_order, current_page);
+                    movieViewAdapter.notifyItemInserted(mItems.size());
+                    updateMovieList(sort_order, current_page);
+                }
             }
         };
 
@@ -174,6 +180,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                     break;
                 }
 
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Popular Movie");
                 /*If new Order to sort then it is acceptable to call webservice*/
                 sort_order = sort_populer;
                 break;
@@ -184,6 +191,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                     break;
                 }
 
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Rated Movie");
                 sort_order = sort_rating;
                 break;
             case R.id.action_favourite:
@@ -191,10 +199,11 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                     isSortingOrderChange = false;
                     break;
                 }
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("My Favourite");
                 sort_order = sort_favourite;
                 break;
         }
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(sort_order);
+
         refreshNewMovieList(sort_order);
         return super.onOptionsItemSelected(item);
     }
@@ -202,11 +211,32 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
     /* Refresh Movie List with new Item, so starting from page 1*/
     private void refreshNewMovieList(String sort_order) {
 
+         /*If sorting order change everything will be reset as per new sorting list*/
+        if (isSortingOrderChange) {
+
+                /*Clear Local holding of List, So New List will be populated*/
+            mItems.clear();
+
+                /* Reset Sorting Order*/
+            isSortingOrderChange = false;
+
+                /* Clear list new list will be added*/
+            movieViewAdapter.resetList();
+
+                /* Clear List which is being displayed*/
+            populateList(new ArrayList<MovieItem>());
+        }
+
         /* Refresh list with sorting, Only if sorting order is changed by user*/
         if (sort_order.equals(sort_favourite)) {
             Cursor cur = getActivity().getContentResolver().query(MovieContract.FavouriteMovie.CONTENT_URI, null, null, null, null);
-            if (cur != null && cur.getCount() > 0)
+            if (cur != null && cur.getCount() > 0) {
                 parseCursor(cur);
+            } else {
+                 /*Remove Empty View*/
+                tvEmptyTextView.setVisibility(View.VISIBLE);
+                tvEmptyTextView.setText("No Favourite yet");
+            }
         } else {
 
             if (new NetWorkInfoUtility().isNetWorkAvailableNow(getContext())) {
@@ -233,6 +263,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         } else {
             /*Add Empty View*/
             tvEmptyTextView.setVisibility(View.VISIBLE);
+            tvEmptyTextView.setText(R.string.msg_internet_status);
         }
     }
 
@@ -244,6 +275,11 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
             new FetchMovieList().execute(param);
         } else {
             L.lToast(getContext(), getString(R.string.msg_internet_status));
+            // If mItems.contains(null) is true means list is contaning pregress bar which we dont need so remove it
+            if (mItems.contains(null)) {
+                mItems.remove(mItems.size() - 1);
+                movieViewAdapter.notifyItemRemoved(mItems.size());
+            }
         }
     }
 
@@ -275,21 +311,6 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         protected void onPostExecute(List<MovieItem> movieItems) {
             super.onPostExecute(movieItems);
 
-            /*If sorting order change everything will be reset as per new sorting list*/
-            if (isSortingOrderChange) {
-
-                /*Clear Local holding of List, So New List will be populated*/
-                mItems.clear();
-
-                /* Reset Sorting Order*/
-                isSortingOrderChange = false;
-
-                /* Clear list new list will be added*/
-                movieViewAdapter.resetList();
-
-                /* Clear List which is being displayed*/
-                populateList(new ArrayList<MovieItem>());
-            }
             if (AppConstant.DEBUG)
                 Toast.makeText(getActivity(), mItems.size() + "Before Remove", Toast.LENGTH_SHORT).show();
 
@@ -312,11 +333,14 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
             }
 
              /*Make first item selected first time*/
-            if (!isFirstSelected) {
+            if (!isFirstSelected && mItems.size() > 0) {
                 isFirstSelected = true;
                 Intent in = new Intent(AppConstant.FILTER_OBJECT);
                 in.putExtra(AppConstant.OBJECT, mItems.get(0));
-                getActivity().sendBroadcast(new Intent(AppConstant.FILTER_OBJECT));
+                getActivity().sendBroadcast(in);
+
+                if (AppConstant.DEBUG)
+                    Toast.makeText(getActivity(), mItems.size() + "Broadcast Sent", Toast.LENGTH_SHORT).show();
             }
 
         }
@@ -337,15 +361,20 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
             cursor.moveToFirst();
             do {
                 String oriTitle = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_ORIGINAL_TITLE));
+                String serverId = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID));
                 String title = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_TITLE));
                 String popularity = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_POPULARITY));
                 String voteAverage = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_VOTE_AVERAGE));
                 String releaseDate = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_RELEASE_DATE));
                 String path = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_POSTER_PATH));
+                String overView = cursor.getString(cursor.getColumnIndex(MovieContract.FavouriteMovie.COL_OVERVIEW));
 
                 MovieItem item = new MovieItem(oriTitle, title, popularity, voteAverage);
                 item.setPoster_path(path);
                 item.setRelease_date(releaseDate);
+                item.setServerId(serverId);
+                item.setOverview(overView);
+
                 movieItems.add(item);
             } while (cursor.moveToNext());
 
@@ -359,7 +388,8 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
     public class NetWorkChangeListener extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(getActivity(), "NetWork Change", Toast.LENGTH_SHORT).show();
+            if (AppConstant.DEBUG)
+                Toast.makeText(getActivity(), "NetWork Change", Toast.LENGTH_SHORT).show();
 
             netWorkEmptyView();
 

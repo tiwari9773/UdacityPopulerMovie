@@ -55,7 +55,7 @@ public class JSONParser {
                 MovieItem temp = new MovieItem(title, path, popularity, vote_avarage);
                 temp.setOriginal_title(original_title);
                 temp.setOriginal_language(original_language);
-                temp.setId(serverId);
+                temp.setServerId(serverId);
                 temp.setVote_count(voteCount);
 
                 temp.setOverview(origArray.getString(WebServiceParsingKeys.MovieKeys.OVERVIEW));

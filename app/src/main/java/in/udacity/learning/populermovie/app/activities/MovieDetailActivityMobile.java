@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -36,6 +38,7 @@ import java.util.List;
 
 import in.udacity.learning.adapter.RecycleMarginDecoration;
 import in.udacity.learning.adapter.TrailerViewAdapter;
+import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.dbhelper.MovieContract;
 import in.udacity.learning.listener.OnTrailerClickListener;
 import in.udacity.learning.model.ReviewItem;
@@ -65,6 +68,8 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
     private MovieItem item;
 
     private ShareActionProvider mShareActionProvider;
+    /*Boolean is present in database*/
+    private boolean isAlreadyFavourated = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -103,87 +108,121 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
 
         item = getIntent().getParcelableExtra(Intent.EXTRA_TEXT);
 
-        /*Setup title of Image*/
-        setTitle(item.getTitle());
+        if (item != null) {
+           /*Setup title of Image*/
+            setTitle(item.getTitle());
 
-        final ImageView ivBanner = (ImageView) findViewById(R.id.iv_movie_poster);
+            final ImageView ivBanner = (ImageView) findViewById(R.id.iv_movie_poster);
 
-        TextView tvTitle = (TextView) findViewById(R.id.tv_original_title);
-        tvTitle.setText(item.getTitle());
+            TextView tvTitle = (TextView) findViewById(R.id.tv_original_title);
+            tvTitle.setText(item.getTitle());
 
-        TextView tvOverview = (TextView) findViewById(R.id.tv_overview);
-        tvOverview.setText(item.getOverview());
+            TextView tvOverview = (TextView) findViewById(R.id.tv_overview);
+            tvOverview.setText(item.getOverview());
 
-        TextView tvLanguage = (TextView) findViewById(R.id.tv_language);
-        tvLanguage.setText(item.getOriginal_language());
+            TextView tvLanguage = (TextView) findViewById(R.id.tv_language);
+            tvLanguage.setText(item.getOriginal_language());
 
-        TextView tvReleaseDate = (TextView) findViewById(R.id.tv_release_date);
-        tvReleaseDate.setText(item.getRelease_date());
+            TextView tvReleaseDate = (TextView) findViewById(R.id.tv_release_date);
+            tvReleaseDate.setText(item.getRelease_date());
 
         /*Set Rating bar out of Five*/
-        RatingBar ratingBar = (RatingBar) findViewById(R.id.rb_ratingbar);
-        float ratingval = Float.parseFloat(item.getVote_average()) / 2;
-        ratingBar.setRating(ratingval);
+            RatingBar ratingBar = (RatingBar) findViewById(R.id.rb_ratingbar);
+            float ratingval = Float.parseFloat(item.getVote_average()) / 2;
+            ratingBar.setRating(ratingval);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                try {
-                    FileOutputStream fileOutputStream = openFileOutput(item.getId() + ".jpg", MODE_PRIVATE);
+            final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
-                    Bitmap bitmap = convertToBitMap(ivBanner.getDrawable(), ivBanner.getWidth(), ivBanner.getHeight());
-                    //Bitmap bitmap = ((BitmapDrawable) ivBanner.getDrawable()).getBitmap();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fileOutputStream);
-                    File file = getFileStreamPath(item.getId() + ".jpg");
-                    String localPath = file.getAbsolutePath();
-
-                    item.setPoster_path(localPath);
-
-                    /*House Keeping Operation*/
-                    fileOutputStream.flush();
-                    fileOutputStream.close();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                ContentValues cv = new ContentValues();
-                cv.put(MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID, item.getId());
-                cv.put(MovieContract.FavouriteMovie.COL_RELEASE_DATE, item.getRelease_date());
-                cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_LANGUAGE, item.getOriginal_language());
-                cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_TITLE, item.getOriginal_title());
-                cv.put(MovieContract.FavouriteMovie.COL_OVERVIEW, item.getOverview());
-                cv.put(MovieContract.FavouriteMovie.COL_POSTER_PATH, item.getPoster_path());
-                cv.put(MovieContract.FavouriteMovie.COL_THUMBNAIL_PATH, item.getPoster_path());
-                cv.put(MovieContract.FavouriteMovie.COL_TITLE, item.getTitle());
-                cv.put(MovieContract.FavouriteMovie.COL_POPULARITY, item.getPopularity());
-                cv.put(MovieContract.FavouriteMovie.COL_VOTE_AVERAGE, item.getVote_average());
-                cv.put(MovieContract.FavouriteMovie.COL_VOTE_COUNT, item.getVote_count());
-
-                Uri uri = getContentResolver().insert(MovieContract.FavouriteMovie.CONTENT_URI, cv);
-                Log.d(TAG, "onClick " + uri.toString() + " Values " + cv.toString());
+            /*Is movie already Favourite*/
+            Uri uri = MovieContract.FavouriteMovie.buildFavouriteUriWithServer(Integer.parseInt(item.getServerId()));
+            Cursor c = getBaseContext().getContentResolver().query(uri, null, null, null, null);
+            if (c != null && c.getCount() > 0) {
+                isAlreadyFavourated = true;
+               /*Change Icon also */
+                fab.setImageDrawable(getResources().getDrawable(R.mipmap.ic_favorite_black_18dp));
+            } else {
+                isAlreadyFavourated = false;
+               /*Change Icon also */
+                fab.setImageDrawable(getResources().getDrawable(R.mipmap.ic_favorite_border_black_18dp));
             }
-        });
 
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isAlreadyFavourated) {
+                        isAlreadyFavourated = false;
+
+                        /*Remove fraom database*/
+                        Uri uri = MovieContract.FavouriteMovie.buildFavouriteUriWithServer(Integer.parseInt(item.getServerId()));
+                        int i = getBaseContext().getContentResolver().delete(uri, null, null);
+                        if (i > 0) {
+                            if (AppConstant.DEBUG)
+                                Toast.makeText(MovieDetailActivityMobile.this, i + " Deleted", Toast.LENGTH_SHORT).show();
+                        }
+
+                            /*Change Icon also */
+                        fab.setImageDrawable(getResources().getDrawable(R.mipmap.ic_favorite_border_black_18dp));
+
+
+                    } else {
+                        try {
+                            FileOutputStream fileOutputStream = openFileOutput(item.getId() + ".jpg", MODE_PRIVATE);
+
+                            Bitmap bitmap = convertToBitMap(ivBanner.getDrawable(), ivBanner.getWidth(), ivBanner.getHeight());
+                            //Bitmap bitmap = ((BitmapDrawable) ivBanner.getDrawable()).getBitmap();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fileOutputStream);
+                            File file = getFileStreamPath(item.getId() + ".jpg");
+                            String localPath = file.getAbsolutePath();
+
+                            item.setPoster_path(localPath);
+
+                            /*House Keeping Operation*/
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        ContentValues cv = new ContentValues();
+                        cv.put(MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID, item.getId());
+                        cv.put(MovieContract.FavouriteMovie.COL_RELEASE_DATE, item.getRelease_date());
+                        cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_LANGUAGE, item.getOriginal_language());
+                        cv.put(MovieContract.FavouriteMovie.COL_ORIGINAL_TITLE, item.getOriginal_title());
+                        cv.put(MovieContract.FavouriteMovie.COL_OVERVIEW, item.getOverview());
+                        cv.put(MovieContract.FavouriteMovie.COL_POSTER_PATH, item.getPoster_path());
+                        cv.put(MovieContract.FavouriteMovie.COL_THUMBNAIL_PATH, item.getPoster_path());
+                        cv.put(MovieContract.FavouriteMovie.COL_TITLE, item.getTitle());
+                        cv.put(MovieContract.FavouriteMovie.COL_POPULARITY, item.getPopularity());
+                        cv.put(MovieContract.FavouriteMovie.COL_VOTE_AVERAGE, item.getVote_average());
+                        cv.put(MovieContract.FavouriteMovie.COL_VOTE_COUNT, item.getVote_count());
+
+                        Uri uri = getContentResolver().insert(MovieContract.FavouriteMovie.CONTENT_URI, cv);
+                        Log.d(TAG, "onClick " + uri.toString() + " Values " + cv.toString());
+                    }
+                }
+
+            });
 
          /* Check Trailer Values and link from server*/
-        if (new NetWorkInfoUtility().isNetWorkAvailableNow(this)) {
-            new FetchTrailerList().execute(new String[]{item.getId(), item.getPoster_path()});
-            new FetchReviewList().execute(new String[]{item.getId()});
-        }
+            if (new NetWorkInfoUtility().isNetWorkAvailableNow(this)) {
+                new FetchTrailerList().execute(new String[]{item.getId(), item.getPoster_path()});
+                new FetchReviewList().execute(new String[]{item.getId()});
+            }
 
-        //Update Image with Big Image
+            //Update Image with Big Image
         /* Change Width of poster so that it should not look bad*/
 
-        item.setPoster_path(item.getPoster_path().replace("w185", "w342"));
-        Glide.with(this)
-                .load(item.getPoster_path())
-                .centerCrop()
-                .placeholder(MainFragment.drawable)
-                .crossFade()
-                .into(ivBanner);
+            item.setPoster_path(item.getPoster_path().replace("w185", "w342"));
+            Glide.with(this)
+                    .load(item.getPoster_path())
+                    .centerCrop()
+                    .placeholder(MainFragment.drawable)
+                    .crossFade()
+                    .into(ivBanner);
+        }
+
 
     }
 

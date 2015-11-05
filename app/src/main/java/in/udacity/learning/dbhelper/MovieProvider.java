@@ -20,6 +20,7 @@ public class MovieProvider extends ContentProvider {
     /*Constant which identifies query*/
     public static final int FAVOURITE = 1;
     public static final int FAVOURITE_BY_ID = 2;
+    public static final int FAVOURITE_BY_SERVER_ID = 3;
     public static final int FAVOURITE_IMAGE = 3;
 
     private static UriMatcher buildUriMatcher() {
@@ -28,10 +29,13 @@ public class MovieProvider extends ContentProvider {
 
         uriMatcher.addURI(content_authority, MovieContract.PATH_FAVOURITE_MOVIE, FAVOURITE);
         uriMatcher.addURI(content_authority, MovieContract.PATH_FAVOURITE_MOVIE + "/*", FAVOURITE_BY_ID);
+        uriMatcher.addURI(content_authority, MovieContract.PATH_FAVOURITE_MOVIE + "/"+MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID+"/*", FAVOURITE_BY_ID);
+
         return uriMatcher;
     }
 
     public static final String sFavouriteWithId = MovieContract.FavouriteMovie._ID + "= ?";
+    public static final String sFavouriteWithServerId = MovieContract.FavouriteMovie.COL_MOVIE_SERVER_ID + "= ?";
 
     @Override
     public boolean onCreate() {
@@ -68,6 +72,18 @@ public class MovieProvider extends ContentProvider {
                         sortOrder
                 );
                 break;
+            case FAVOURITE_BY_SERVER_ID:
+                String getServerId = uri.getLastPathSegment();
+                resCursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.FavouriteMovie.TABLE_NAME,
+                        projection,
+                        sFavouriteWithServerId,
+                        new String[]{getServerId},
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
 
@@ -84,6 +100,9 @@ public class MovieProvider extends ContentProvider {
                 return MovieContract.FavouriteMovie.CONTENT_DIR_TYPE;
 
             case FAVOURITE_BY_ID:
+                return MovieContract.FavouriteMovie.CONTENT_ITEM_TYPE;
+
+            case FAVOURITE_BY_SERVER_ID:
                 return MovieContract.FavouriteMovie.CONTENT_ITEM_TYPE;
 
         }
@@ -129,6 +148,10 @@ public class MovieProvider extends ContentProvider {
                 rowsDeleted = db.delete(MovieContract.FavouriteMovie.TABLE_NAME, sFavouriteWithId, new String[]{uri.getLastPathSegment()});
                 break;
 
+            case FAVOURITE_BY_SERVER_ID:
+                rowsDeleted = db.delete(MovieContract.FavouriteMovie.TABLE_NAME, sFavouriteWithServerId, new String[]{uri.getLastPathSegment()});
+                break;
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -144,11 +167,15 @@ public class MovieProvider extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
-        int rowAffected;
+        int rowAffected = 0;
 
         switch (match) {
             case FAVOURITE_BY_ID:
-                rowAffected = db.delete(MovieContract.FavouriteMovie.TABLE_NAME, sFavouriteWithId, new String[]{uri.getLastPathSegment()});
+                //rowAffected = db.update();
+                break;
+
+            case FAVOURITE_BY_SERVER_ID:
+                //rowAffected = db.delete();
                 break;
 
             default:

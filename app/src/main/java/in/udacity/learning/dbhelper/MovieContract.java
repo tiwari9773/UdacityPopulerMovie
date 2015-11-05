@@ -50,7 +50,7 @@ public class MovieContract {
         public static String COL_OVERVIEW = "overview";
         public static String COL_RELEASE_DATE = "release_date";
         public static String COL_POSTER_PATH = "poster_path";
-        public static String COL_THUMBNAIL_PATH = "poster_path";
+        public static String COL_THUMBNAIL_PATH = "thumbnail_path";
         public static String COL_POPULARITY = "popularity";
         public static String COL_TITLE = "title";
         public static String COL_VIDEO = "video";
@@ -79,6 +79,11 @@ public class MovieContract {
         /*TO selelct movie with Id*/
         public static Uri buildFavouriteUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        /*TO selelct movie with Id*/
+        public static Uri buildFavouriteUriWithServer(long id) {
+            return CONTENT_URI.buildUpon().appendPath(COL_MOVIE_SERVER_ID).appendPath(String.valueOf(id)).build();
         }
     }
 

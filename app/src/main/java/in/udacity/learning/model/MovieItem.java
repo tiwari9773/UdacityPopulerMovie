@@ -14,7 +14,17 @@ public class MovieItem implements Parcelable {
     private String adult = "adult";
     private String backdrop_path = "backdrop_path";
     private String genre_ids = "genre_ids";
+
     private String id = "id";
+    private String serverId = "serverId";
+
+    public String getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(String serverId) {
+        this.serverId = serverId;
+    }
 
     public String getOriginal_language() {
         return original_language;
@@ -165,6 +175,7 @@ public class MovieItem implements Parcelable {
 
     protected MovieItem(Parcel in) {
         popularity = in.readString();
+        serverId = in.readString();
         page = in.readString();
         adult = in.readString();
         backdrop_path = in.readString();
@@ -192,6 +203,7 @@ public class MovieItem implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(popularity);
+        dest.writeString(serverId);
         dest.writeString(page);
         dest.writeString(adult);
         dest.writeString(backdrop_path);

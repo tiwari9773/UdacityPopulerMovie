@@ -6,10 +6,10 @@ package in.udacity.learning.constant;
 public class AppConstant {
 
     // For publishing
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
 
     // for development time
-    public static boolean DEVELOPER = true;
+    public static boolean DEVELOPER = false;
 
 
     public static String TYPE_TEXT_DATA_TRANS = "text/plain";

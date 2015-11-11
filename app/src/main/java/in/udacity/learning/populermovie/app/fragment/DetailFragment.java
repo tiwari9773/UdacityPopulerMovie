@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -39,6 +40,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import in.udacity.learning.adapter.RecycleMarginDecoration;
@@ -75,7 +77,7 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
     private MyBroadcastReciver receiver;
 
     /*Boolean is present in database*/
-    private boolean isAlreadyFavourated = false;
+    private boolean isAlreadyFavourited = false;
 
     @Override
     public void onAttach(Context context) {
@@ -86,16 +88,16 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         receiver = new MyBroadcastReciver();
-        getActivity().registerReceiver(receiver, new IntentFilter(AppConstant.FILTER_OBJECT));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, new IntentFilter(AppConstant.FILTER_OBJECT));
     }
 
     public class MyBroadcastReciver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(getContext(), "completed Load of List", Toast.LENGTH_SHORT).show();
+            if (AppConstant.DEBUG)
+                Toast.makeText(getContext(), "completed Load of List", Toast.LENGTH_SHORT).show();
             item = intent.getParcelableExtra(AppConstant.OBJECT);
             initialise(view);
         }
@@ -105,7 +107,7 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
     public void onStop() {
         super.onStop();
         if (receiver != null)
-            getActivity().unregisterReceiver(receiver);
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(receiver);
     }
 
     @Nullable
@@ -149,11 +151,11 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
             Uri uri = MovieContract.FavouriteMovie.buildFavouriteUriWithServer(Integer.parseInt(item.getServerId()));
             Cursor c = getActivity().getBaseContext().getContentResolver().query(uri, null, null, null, null);
             if (c != null && c.getCount() > 0) {
-                isAlreadyFavourated = true;
+                isAlreadyFavourited = true;
                /*Change Icon also */
                 fab.setImageDrawable(getActivity().getResources().getDrawable(R.mipmap.ic_favorite_black_18dp));
             } else {
-                isAlreadyFavourated = false;
+                isAlreadyFavourited = false;
                /*Change Icon also */
                 fab.setImageDrawable(getActivity().getResources().getDrawable(R.mipmap.ic_favorite_border_black_18dp));
             }
@@ -161,8 +163,8 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (isAlreadyFavourated) {
-                        isAlreadyFavourated = false;
+                    if (isAlreadyFavourited) {
+                        isAlreadyFavourited = false;
 
                         /*Remove fraom database*/
                         Uri uri = MovieContract.FavouriteMovie.buildFavouriteUriWithServer(Integer.parseInt(item.getServerId()));
@@ -180,7 +182,7 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
 
                            /*Change Icon also */
                             fab.setImageDrawable(getActivity().getResources().getDrawable(R.mipmap.ic_favorite_black_18dp));
-                            isAlreadyFavourated = true;
+                            isAlreadyFavourited = true;
 
                             FileOutputStream fileOutputStream = getActivity().openFileOutput(item.getServerId() + ".jpg", getActivity().MODE_PRIVATE);
                             Bitmap bitmap = convertToBitMap(ivBanner.getDrawable(), ivBanner.getWidth(), ivBanner.getHeight());
@@ -195,7 +197,7 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
                             fileOutputStream.flush();
                             fileOutputStream.close();
 
-                            isAlreadyFavourated = true;
+                            isAlreadyFavourited = true;
 
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
@@ -238,7 +240,7 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
                     .load(item.getPoster_path())
                     .centerCrop()
                     .placeholder(MainFragment.drawable)
-                    .crossFade()
+                    .fitCenter()
                     .into(ivBanner);
         }
 
@@ -255,7 +257,6 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
 
     @Override
     public void onMovieTrailer(String youTubeKey) {
-
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + youTubeKey));
             startActivity(intent);
@@ -322,6 +323,8 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
 
         RecycleMarginDecoration recycleMarginDecoration = new RecycleMarginDecoration(getContext());
         recyclerView.addItemDecoration(recycleMarginDecoration);
+        recyclerView.setHasFixedSize(true);
+
         TrailerViewAdapter adapter = new TrailerViewAdapter(item, this);
         recyclerView.setAdapter(adapter);
     }
@@ -360,7 +363,7 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         shareIntent.setType("text/plain");
         if (item != null)
-            shareIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle()+"\n"+item.getOverview());
+            shareIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle() + "\n" + item.getOverview());
         return shareIntent;
     }
 

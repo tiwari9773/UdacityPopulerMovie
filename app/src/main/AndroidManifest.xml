@@ -22,7 +22,6 @@
             android:name=".activities.MovieDetailActivityMobile"
             android:parentActivityName=".activities.MainActivity" />
 
-        <receiver android:name=".fragment.DetailFragment$MyBroadcastReciver" />
         <provider
             android:name="in.udacity.learning.dbhelper.MovieProvider"
             android:authorities="@string/content_authority"

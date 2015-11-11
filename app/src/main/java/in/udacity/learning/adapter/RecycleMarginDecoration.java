@@ -22,6 +22,6 @@ public class RecycleMarginDecoration extends RecyclerView.ItemDecoration {
     @Override
     public void getItemOffsets(
             Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        outRect.set(margin, margin / 2, margin / 2, 0);
+        outRect.set(margin, margin , margin / 2, 0);
     }
 }

@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -147,8 +148,10 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
 
         RecyclerView recycleView = (RecyclerView) view.findViewById(R.id.rv_movie_list);
         //final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        //int span =
         final GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
         recycleView.setLayoutManager(layoutManager);
+        recycleView.setHasFixedSize(true);
 
         RecycleMarginDecoration marginDecoration = new RecycleMarginDecoration(getContext());
         recycleView.addItemDecoration(marginDecoration);
@@ -320,9 +323,9 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         protected void onPostExecute(List<MovieItem> movieItems) {
             super.onPostExecute(movieItems);
 
+            String value = mItems == null ? "No Value" : mItems.size() + "";
             if (AppConstant.DEBUG)
-                Toast.makeText(getActivity(), mItems.size() + "Before Remove", Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(getActivity(), mItems.size() + "Before Remove" + value, Toast.LENGTH_SHORT).show();
             if (mItems != null && mItems.size() > 0) {
                 //remove progress item
                 mItems.remove(mItems.size() - 1);
@@ -344,11 +347,11 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
             }
 
              /*Make first item selected first time*/
-            if (!isFirstSelected && mItems != null && mItems.get(0) != null && mItems.size() > 0) {
+            if (!isFirstSelected && mItems != null && mItems.size() > 0 && mItems.get(0) != null) {
                 isFirstSelected = true;
                 Intent in = new Intent(AppConstant.FILTER_OBJECT);
                 in.putExtra(AppConstant.OBJECT, mItems.get(0));
-                getActivity().sendBroadcast(in);
+                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(in);
 
                 if (AppConstant.DEBUG)
                     Toast.makeText(getActivity(), mItems.size() + "Broadcast Sent", Toast.LENGTH_SHORT).show();

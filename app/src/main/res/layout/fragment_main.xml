@@ -4,10 +4,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.v7.widget.RecyclerView
+    <in.udacity.learning.custom_view.AutofitRecyclerView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/rv_movie_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:padding="@dimen/default_padding"
+        android:columnWidth="@dimen/movie_thumbnail_dimen"
+        android:clipToPadding="false"/>
 
     <TextView
         android:id="@+id/tv_empty_view"

@@ -5,7 +5,7 @@
 
     <ImageView
         android:id="@+id/iv_movie_thumbnail"
-        android:layout_width="@dimen/movie_thumbnail_dimen"
+        android:layout_width="match_parent"
         android:layout_height="@dimen/movie_thumbnail_dimen"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"

@@ -1,15 +1,22 @@
 package in.udacity.learning.network;
 
+import android.app.Application;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.Calendar;
+
+import in.udacity.learning.constant.AppConstant;
+import in.udacity.learning.populermovie.app.activities.MyApplication;
 
 /**
  * Created by USER on 03-Sep-15.
  */
-public class NetWorkInfoUtility {
+class NetWorkInfoUtility {
 
     private boolean isNetworkAvailable = false;
 
@@ -32,7 +39,6 @@ public class NetWorkInfoUtility {
     private boolean isWifiEnable = false;
     private boolean isMobileNetworkAvailable = false;
 
-
     public boolean isNetWorkAvailableNow(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -42,14 +48,15 @@ public class NetWorkInfoUtility {
         if (isWifiEnable() || isMobileNetworkAvailable()) {
             /*Sometime wifi is connected but service provider never connected to internet
             so cross check one more time*/
-            if (isOnline())
+            if (isOnline(context))
                 isNetworkAvailable = true;
         }
 
         return isNetworkAvailable;
     }
 
-    public boolean isOnline() {
+    public boolean isOnline(Context context) {
+        long t = Calendar.getInstance().getTimeInMillis();
         Runtime runtime = Runtime.getRuntime();
         try {
             /*Pinging to Google server*/
@@ -60,6 +67,9 @@ public class NetWorkInfoUtility {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            long t2 = Calendar.getInstance().getTimeInMillis();
+            Log.i("NetWork check Time", (t2 - t) + "");
         }
         return false;
     }

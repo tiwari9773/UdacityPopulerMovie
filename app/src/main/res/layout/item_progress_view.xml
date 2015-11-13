@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="center_horizontal"
     android:gravity="center_horizontal"
+    android:foreground="@drawable/recycle_item_selector"
     android:orientation="vertical">
 
     <ProgressBar

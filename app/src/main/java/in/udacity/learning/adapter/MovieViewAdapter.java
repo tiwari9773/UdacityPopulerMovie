@@ -1,16 +1,25 @@
 package in.udacity.learning.adapter;
 
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.os.Build;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import java.util.List;
 
+import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.listener.OnMovieItemClickListener;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.populermovie.app.R;
@@ -20,8 +29,10 @@ import in.udacity.learning.populermovie.app.R;
  */
 public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private final String TAG = "MovieViewAdapter";
     private List<MovieItem> lsItem;
     private OnMovieItemClickListener onMovieItemClickListener;
+
     private final int EMPTY_VIEW = 2;
     private final int PROGRESS_VIEW = 1;
 
@@ -38,8 +49,7 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_progress_view, viewGroup, false);
             ProgressViewHolder movieHolder = new ProgressViewHolder(view);
             return movieHolder;
-        }
-        else {
+        } else {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_movie_list_main, viewGroup, false);
             MovieHolder movieHolder = new MovieHolder(view);
             return movieHolder;
@@ -56,17 +66,49 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int i) {
         if (holder instanceof MovieHolder) {
-            MovieHolder movieHolder = (MovieHolder) holder;
+            final MovieHolder movieHolder = (MovieHolder) holder;
             movieHolder.tvMovieName.setText(lsItem.get(i).getTitle());
 
             Glide.with(movieHolder.tvMovieName.getContext())
-                    .load(lsItem.get(i).getPoster_path())
+                    .load(lsItem.get(i).getPoster_path()).asBitmap()
+                    .listener(
+                            new RequestListener<String, Bitmap>() {
+                                @Override
+                                public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                    Palette.from(resource).generate(
+                                            new Palette.PaletteAsyncListener() {
+                                                @Override
+                                                public void onGenerated(Palette palette) {
+                                                    int transparent = R.color.tranparent;
+                                                    int extractedColor  = palette.getDarkMutedColor(transparent);
+
+                                                    movieHolder.tvMovieName.setBackgroundColor(adjustAlpha(extractedColor,0.8f));
+                                                }
+                                            }
+
+                                    );
+                                    return false;
+                                }
+                            }
+                    )
                     .centerCrop()
                     .placeholder(R.mipmap.ic_launcher)
-                    .crossFade()
                     .into(movieHolder.imageView);
         }
 
+    }
+
+    public int adjustAlpha(int color, float factor) {
+        int alpha = Math.round(Color.alpha(color) * factor);
+        int red = Color.red(color);
+        int green = Color.green(color);
+        int blue = Color.blue(color);
+        return Color.argb(alpha, red, green, blue);
     }
 
     @Override
@@ -107,7 +149,7 @@ public class MovieViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             tvMovieName = (TextView) itemView.findViewById(R.id.tv_movie_name);
 
             // What would be best way for Recycle Click Listener
-            imageView.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onMovieItemClickListener.onClickMovieThumbnail(imageView, getLayoutPosition());

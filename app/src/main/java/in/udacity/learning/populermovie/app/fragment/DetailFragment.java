@@ -18,10 +18,8 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,18 +38,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import in.udacity.learning.adapter.RecycleMarginDecoration;
 import in.udacity.learning.adapter.TrailerViewAdapter;
+import in.udacity.learning.network.CheckNetworkConnection;
 import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.dbhelper.MovieContract;
 import in.udacity.learning.listener.OnTrailerClickListener;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.model.ReviewItem;
 import in.udacity.learning.model.TrailerItem;
-import in.udacity.learning.network.NetWorkInfoUtility;
 import in.udacity.learning.populermovie.app.R;
 import in.udacity.learning.web_service.HttpURLConnectionWebService;
 import in.udacity.learning.web_service.JSONParser;
@@ -73,11 +70,14 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
     /*View for display*/
     private View view;
 
-    private ShareActionProvider mShareActionProvider;
+    /*It receive info as panel list is loaded completely*/
     private MyBroadcastReciver receiver;
 
     /*Boolean is present in database*/
     private boolean isAlreadyFavourited = false;
+
+    /*Holds All Trailer view of Movie*/
+    private String mTrailerId = "No Trailer";
 
     @Override
     public void onAttach(Context context) {
@@ -96,7 +96,7 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (AppConstant.DEBUG)
+            if (AppConstant.DEBUG_DONE)
                 Toast.makeText(getContext(), "completed Load of List", Toast.LENGTH_SHORT).show();
             item = intent.getParcelableExtra(AppConstant.OBJECT);
             initialise(view);
@@ -128,6 +128,9 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
 
         final ImageView ivBanner = (ImageView) view.findViewById(R.id.iv_movie_poster);
         if (item != null) {
+            TextView tv = (TextView) view.findViewById(R.id.tv_no_movie_selected);
+            tv.setVisibility(View.GONE);
+
             TextView tvTitle = (TextView) view.findViewById(R.id.tv_original_title);
             tvTitle.setText(item.getTitle());
 
@@ -227,11 +230,25 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
                 }
             });
 
-         /* Check Trailer Values and link from server*/
-            if (new NetWorkInfoUtility().isNetWorkAvailableNow(getActivity())) {
-                new FetchTrailerList().execute(new String[]{item.getServerId(), item.getPoster_path()});
-                new FetchReviewList().execute(new String[]{item.getServerId()});
-            }
+          /* Check Trailer Values and link from server*/
+            new CheckNetworkConnection(getActivity(), false, new CheckNetworkConnection.OnConnectionCallback() {
+
+                @Override
+                public void onConnectionSuccess() {
+                    if (AppConstant.DEBUG)
+                        Toast.makeText(getActivity(), "onConnectionSuccess()", Toast.LENGTH_SHORT).show();
+
+                    new FetchTrailerList().execute(new String[]{item.getServerId(), item.getPoster_path()});
+                    new FetchReviewList().execute(new String[]{item.getServerId()});
+
+                }
+
+                @Override
+                public void onConnectionFail(String msg) {
+                    if (AppConstant.DEBUG)
+                        Toast.makeText(getActivity(), "onConnectionFail()", Toast.LENGTH_SHORT).show();
+                }
+            }).execute();
 
             //Update Image with Big Image
         /* Change Width of poster so that it should not look bad*/
@@ -242,8 +259,13 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
                     .placeholder(MainFragment.drawable)
                     .fitCenter()
                     .into(ivBanner);
-        }
+        } else {
 
+            /* It will refresh the view from previous selection*/
+            ivBanner.setImageResource(R.mipmap.ic_launcher);
+            TextView tv = (TextView) view.findViewById(R.id.tv_no_movie_selected);
+            tv.setVisibility(View.VISIBLE);
+        }
     }
 
     /*Convert ImageView to Bitmap*/
@@ -316,6 +338,9 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
 
     /*Set Trailer of movie*/
     private void setTrailerView(List<TrailerItem> item) {
+          /*Initialise with first key of you tube video*/
+        mTrailerId = item.get(0).getKey();
+
         /*Trailer Setup*/
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.rv_trailer);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -348,22 +373,33 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_detail, menu);
-
-        // Retrieve the share menu item
-        MenuItem menuItem = menu.findItem(R.id.action_share);
-
-        // Get the provider and hold onto it to set/change the share intent.
-        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
-        mShareActionProvider.setShareIntent(createShareForecastIntent());
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.action_share:
+                createShareForecastIntent();
+        }
+
+        if (AppConstant.DEBUG_DONE)
+            Toast.makeText(getActivity(), "Inside Detail Fragment", Toast.LENGTH_SHORT).show();
+
+        return super.onOptionsItemSelected(item);
     }
 
     private Intent createShareForecastIntent() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         shareIntent.setType("text/plain");
-        if (item != null)
-            shareIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle() + "\n" + item.getOverview());
+
+        String trailerURL = "No Trailer";
+        if (mTrailerId != null && !mTrailerId.equals("No Trailer"))
+            trailerURL = WebServiceURL.youTubeBaseUrl + mTrailerId;
+
+        shareIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle() + "\n" + trailerURL);
         return shareIntent;
     }
 

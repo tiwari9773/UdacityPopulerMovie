@@ -31,13 +31,13 @@ import java.util.List;
 
 import in.udacity.learning.adapter.MovieViewAdapter;
 import in.udacity.learning.adapter.RecycleMarginDecoration;
+import in.udacity.learning.network.CheckNetworkConnection;
 import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.dbhelper.MovieContract;
 import in.udacity.learning.listener.OnMovieItemClickListener;
 import in.udacity.learning.listener.RecycleEndlessScrollListener;
 import in.udacity.learning.logger.L;
 import in.udacity.learning.model.MovieItem;
-import in.udacity.learning.network.NetWorkInfoUtility;
 import in.udacity.learning.populermovie.app.R;
 import in.udacity.learning.web_service.HttpURLConnectionWebService;
 import in.udacity.learning.web_service.JSONParser;
@@ -73,7 +73,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
     /*Endless scroll listener*/
     private RecycleEndlessScrollListener recycleEndlessScrollListener;
 
-    /*Network Change listente*/
+    /*Network Change listener*/
     private NetWorkChangeListener netWorkChangeListener;
 
     /*Make first item selected first time*/
@@ -91,7 +91,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         void onItemSelected(MovieItem item, View clickedView);
     }
 
-    /*Call back Reference*/
+    /*Call back Reference for parent Activity*/
     private Callback referenceForCallback;
 
     @Override
@@ -118,10 +118,13 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         /* Empty View When no internet is present*/
         tvEmptyTextView = (TextView) view.findViewById(R.id.tv_empty_view);
 
+         /*
+        *Add Broadcast listener at last , If we register earlier then It might listen even before
+        * we initialise our views
+        */
         netWorkChangeListener = new NetWorkChangeListener();
         IntentFilter intentfilter = new IntentFilter();
         intentfilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-
         /*Local Broadcast manager For network notification*/
         getActivity().registerReceiver(netWorkChangeListener, intentfilter);
 
@@ -136,7 +139,8 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                     // add progress bar multiple times.
                     if (mItems != null && !mItems.contains(null)) {
                         mItems.add(null);
-                        if (AppConstant.DEBUG)
+
+                        if (AppConstant.DEBUG_DONE)
                             Toast.makeText(getActivity(), mItems.size() + "Loaded", Toast.LENGTH_SHORT).show();
                     }
 
@@ -148,8 +152,8 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
 
         RecyclerView recycleView = (RecyclerView) view.findViewById(R.id.rv_movie_list);
         //final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        //int span =
-        final GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
+        int span = 2;
+        final GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), span);
         recycleView.setLayoutManager(layoutManager);
         recycleView.setHasFixedSize(true);
 
@@ -160,7 +164,6 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
 
         /*On Scroll Listener*/
         recycleView.addOnScrollListener(recycleEndlessScrollListener);
-
     }
 
     @Override
@@ -180,48 +183,65 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                 /*If There is no change as per record no need to initiate change*/
                 if (sort_order.equals(sort_populer)) {
                     isSortingOrderChange = false;
-                    break;
+                    return true;
                 }
 
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Popular Movie");
                 /*If new Order to sort then it is acceptable to call webservice*/
                 sort_order = sort_populer;
 
-                /*Now list is new and completely refresh, so application make firstone as Selected*/
+                /*Clear OtherPanel*/
+                referenceForCallback.onItemSelected(null, null);
+
+                /*Now list is new and completely refresh, so application make first one as Selected*/
                 isFirstSelected = false;
-                break;
+                refreshNewMovieList(sort_order);
+                return true;
 
             case R.id.action_sort_by_rating:
                 if (sort_order.equals(sort_rating)) {
                     isSortingOrderChange = false;
-                    break;
+                    return true;
                 }
 
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Rated Movie");
                 sort_order = sort_rating;
 
+                 /*Clear OtherPanel*/
+                referenceForCallback.onItemSelected(null,null);
+
                 /*Now list is new and completely refresh, so application make firstone as Selected*/
                 isFirstSelected = false;
-                break;
+                refreshNewMovieList(sort_order);
+                return true;
             case R.id.action_favourite:
                 if (sort_order.equals(sort_favourite)) {
                     isSortingOrderChange = false;
-                    break;
+                    return true;
                 }
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("My Favourite");
 
                 sort_order = sort_favourite;
+
+                 /*Clear OtherPanel*/
+                referenceForCallback.onItemSelected(null,null);
+
                 /*Now list is new and completely refresh, so application make firstone as Selected*/
                 isFirstSelected = false;
-                break;
+                refreshNewMovieList(sort_order);
+                return true;
         }
 
-        refreshNewMovieList(sort_order);
+        if (AppConstant.DEBUG_DONE)
+            Toast.makeText(getActivity(), "Inside Main Fragment", Toast.LENGTH_SHORT).show();
+        //Strictly Do not write here every time menu getting clicked even in second panel in tablet layout
+        // it will get called execute so write it in every block
+        //refreshNewMovieList(sort_order);
         return super.onOptionsItemSelected(item);
     }
 
     /* Refresh Movie List with new Item, so starting from page 1*/
-    private void refreshNewMovieList(String sort_order) {
+    private void refreshNewMovieList(final String sort_order) {
 
          /*If sorting order change everything will be reset as per new sorting list*/
         if (isSortingOrderChange) {
@@ -235,7 +255,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                 /* Clear list new list will be added*/
             movieViewAdapter.resetList();
 
-                /* Clear List which is being displayed*/
+            /* Clear List which is being displayed*/
             populateList(new ArrayList<MovieItem>());
         }
 
@@ -249,50 +269,71 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                 tvEmptyTextView.setVisibility(View.VISIBLE);
                 tvEmptyTextView.setText("No Favourite yet");
             }
-        } else {
 
-            if (new NetWorkInfoUtility().isNetWorkAvailableNow(getContext())) {
-               /*Remove Empty View*/
-                tvEmptyTextView.setVisibility(View.GONE);
-
-               /*For Progress Bar*/
-                if (mItems != null)
-                    mItems.add(null);
-
-            /* By default considering first page*/
-                int current_page = 1;
-                updateMovieList(sort_order, current_page);
-            } else {
-                netWorkEmptyView();
-            }
+            /*Work of this method is over so return*/
+            return;
         }
+
+        /*For Progress Bar*/
+        if (mItems != null)
+            mItems.add(null);
+
+        /* By default considering first page*/
+        int current_page = 1;
+        updateMovieList(sort_order, current_page);
     }
 
+
     /*Automatically Adjust about-view*/
-    private void netWorkEmptyView() {
-        if (new NetWorkInfoUtility().isNetWorkAvailableNow(getContext())) {
+    private void networkEmptyView(boolean isConnected) {
+
+        if (isConnected) {
             tvEmptyTextView.setVisibility(View.GONE);
         } else {
-            /*Add Empty View*/
+                /*Add Empty View*/
             tvEmptyTextView.setVisibility(View.VISIBLE);
             tvEmptyTextView.setText(R.string.msg_internet_status);
         }
     }
 
-    private void updateMovieList(String sortOrder, int current_page) {
-        //
-        String param[] = new String[]{sortOrder, "2015", String.valueOf(current_page)};
+    private void updateMovieList(final String sortOrder, final int current_page) {
 
-        if (new NetWorkInfoUtility().isNetWorkAvailableNow(getContext())) {
-            new FetchMovieList().execute(param);
-        } else {
-            L.lToast(getContext(), getString(R.string.msg_internet_status));
-            // If mItems.contains(null) is true means list is contaning pregress bar which we dont need so remove it
-            if (mItems.contains(null)) {
-                mItems.remove(mItems.size() - 1);
-                movieViewAdapter.notifyItemRemoved(mItems.size());
+        new CheckNetworkConnection(getContext(), false, new CheckNetworkConnection.OnConnectionCallback() {
+            @Override
+            public void onConnectionSuccess() {
+                networkEmptyView(true);
+
+                if (AppConstant.DEBUG)
+                    L.lToast(getContext(), "Connected Inside MainFrag");
+                //
+                String param[] = new String[]{sortOrder, "2015", String.valueOf(current_page)};
+                new FetchMovieList().execute(param);
             }
-        }
+
+
+            @Override
+            public void onConnectionFail(String errorMsg) {
+                L.lToast(getContext(), getString(R.string.msg_internet_status));
+
+                if (mItems != null && mItems.size() > 0) {
+                    // If mItems.contains(null) is true means list is containing progress bar which we dont need so remove it
+                    if (mItems.contains(null)) {
+                        mItems.remove(mItems.size() - 1);
+                        movieViewAdapter.notifyItemRemoved(mItems.size());
+                    }
+                }
+
+                /*
+                *After Removing loader from above bock, Is Size reduces to zero that means nothing to display
+                * hence show on Screen No Internet Connection
+                * else It would not display and user will be notified only through Toast only
+                * */
+                if (mItems == null || mItems.size() == 0) {
+                    networkEmptyView(false);
+                }
+            }
+        }).execute();
+
     }
 
     @Override
@@ -324,8 +365,9 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
             super.onPostExecute(movieItems);
 
             String value = mItems == null ? "No Value" : mItems.size() + "";
-            if (AppConstant.DEBUG)
+            if (AppConstant.DEBUG_DONE)
                 Toast.makeText(getActivity(), mItems.size() + "Before Remove" + value, Toast.LENGTH_SHORT).show();
+
             if (mItems != null && mItems.size() > 0) {
                 //remove progress item
                 mItems.remove(mItems.size() - 1);
@@ -339,7 +381,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                     recycleEndlessScrollListener.setMaxPages(Integer.parseInt(MovieItem.getTotal_pages()));
 
                 if (mItems != null) {
-                    if (AppConstant.DEBUG)
+                    if (AppConstant.DEBUG_DONE)
                         Toast.makeText(getActivity(), mItems.size() + "AfterRemove", Toast.LENGTH_SHORT).show();
 
                     mItems.addAll(movieItems);
@@ -353,10 +395,9 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                 in.putExtra(AppConstant.OBJECT, mItems.get(0));
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(in);
 
-                if (AppConstant.DEBUG)
+                if (AppConstant.DEBUG_DONE)
                     Toast.makeText(getActivity(), mItems.size() + "Broadcast Sent", Toast.LENGTH_SHORT).show();
             }
-
         }
     }
 
@@ -365,7 +406,6 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         movieViewAdapter.addListItem(movieItems);
         movieViewAdapter.notifyDataSetChanged();
     }
-
 
     /* Cursor Parsing*/
     private void parseCursor(Cursor cursor) {
@@ -396,7 +436,6 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
             movieViewAdapter.resetList();
             populateList(movieItems);
         }
-
     }
 
     public class NetWorkChangeListener extends BroadcastReceiver {
@@ -405,13 +444,22 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
             if (AppConstant.DEBUG)
                 Toast.makeText(getActivity(), "NetWork Change", Toast.LENGTH_SHORT).show();
 
-            netWorkEmptyView();
+            new CheckNetworkConnection(getActivity(), false, new CheckNetworkConnection.OnConnectionCallback() {
+                @Override
+                public void onConnectionSuccess() {
+                    networkEmptyView(true);
 
-            if (new NetWorkInfoUtility().isNetWorkAvailableNow(getContext())) {
-                //for second time when user press back button we should not load again
-                if (mItems == null || mItems.size() == 0)
-                    refreshNewMovieList(sort_order);
-            }
+                    //for second time when user press back button we should not load again
+                    if (mItems == null || mItems.size() == 0)
+                        refreshNewMovieList(sort_order);
+                }
+
+                @Override
+                public void onConnectionFail(String errorMsg) {
+                    networkEmptyView(false);
+                }
+            }).execute();
+
         }
     }
 
@@ -421,5 +469,4 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
         /*Local Broadcast manager*/
         getActivity().unregisterReceiver(netWorkChangeListener);
     }
-
 }

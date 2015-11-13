@@ -9,6 +9,9 @@
         <item name="android:textColor">@color/primary_text</item>
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorControlHighlight">@color/half2_transparent_primary</item>
+        <item name="android:windowContentTransitions">true</item>
+
     </style>
 
     <style name="my_progress" parent="android:Widget.Material.ProgressBar.Large"></style>

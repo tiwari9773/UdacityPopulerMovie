@@ -6,7 +6,10 @@ package in.udacity.learning.constant;
 public class AppConstant {
 
     // For publishing
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
+
+    // For publishing
+    public static boolean DEBUG_DONE = false;
 
     // for development time
     public static boolean DEVELOPER = false;

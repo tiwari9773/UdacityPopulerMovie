@@ -88,7 +88,7 @@ public class TrailerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             textView = (TextView) itemView.findViewById(R.id.tv_trailerName);
 
             // What would be best way for Recycle Click Listener
-            imageView.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onTrailerClickListener.onMovieTrailer(lsItem.get(getLayoutPosition()).getKey());

@@ -8,13 +8,17 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.ShareActionProvider;
@@ -29,11 +33,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import in.udacity.learning.adapter.RecycleMarginDecoration;
@@ -43,8 +50,8 @@ import in.udacity.learning.dbhelper.MovieContract;
 import in.udacity.learning.listener.OnTrailerClickListener;
 import in.udacity.learning.model.ReviewItem;
 import in.udacity.learning.model.TrailerItem;
-import in.udacity.learning.network.NetWorkInfoUtility;
 import in.udacity.learning.model.MovieItem;
+import in.udacity.learning.network.CheckNetworkConnection;
 import in.udacity.learning.populermovie.app.R;
 import in.udacity.learning.populermovie.app.fragment.MainFragment;
 import in.udacity.learning.web_service.HttpURLConnectionWebService;
@@ -67,9 +74,14 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
     /*Selected Movie App*/
     private MovieItem item;
 
-    private ShareActionProvider mShareActionProvider;
+    /*Holds All Trailer view of Movie*/
+    private String mTrailerId = "No Trailer";
+
     /*Boolean is present in database*/
     private boolean isAlreadyFavourated = false;
+
+    /*For dynamic Color Change*/
+    private CollapsingToolbarLayout collapsingToolbarLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -85,21 +97,29 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_detail, menu);
-
-        // Retrieve the share menu item
-        MenuItem menuItem = menu.findItem(R.id.action_share);
-
-        // Get the provider and hold onto it to set/change the share intent.
-        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
-        mShareActionProvider.setShareIntent(createShareForecastIntent());
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.action_share:
+                startActivity(createShareForecastIntent());
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private Intent createShareForecastIntent() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle()+"\n"+item.getOverview());
+
+        String trailerURL = "No Trailer";
+        if (mTrailerId != null && !mTrailerId.equals("No Trailer"))
+            trailerURL = WebServiceURL.youTubeBaseUrl + mTrailerId;
+
+        shareIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle() + "\n" + trailerURL);
         return shareIntent;
     }
 
@@ -109,6 +129,10 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        /*Initialise Collapsing Toolbar*/
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+
+        /*Get The Item Form Intent*/
         item = getIntent().getParcelableExtra(Intent.EXTRA_TEXT);
 
         if (item != null) {
@@ -211,21 +235,65 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
 
             });
 
-         /* Check Trailer Values and link from server*/
-            if (new NetWorkInfoUtility().isNetWorkAvailableNow(this)) {
-                new FetchTrailerList().execute(new String[]{item.getServerId(), item.getPoster_path()});
-                new FetchReviewList().execute(new String[]{item.getServerId()});
-            }
+          /* Check Trailer Values and link from server*/
+            new CheckNetworkConnection(this,false, new CheckNetworkConnection.OnConnectionCallback() {
+
+                @Override
+                public void onConnectionSuccess() {
+                    if (AppConstant.DEBUG)
+                        Toast.makeText(MovieDetailActivityMobile.this, "onConnectionSuccess()", Toast.LENGTH_SHORT).show();
+
+                    new FetchTrailerList().execute(new String[]{item.getServerId(), item.getPoster_path()});
+                    new FetchReviewList().execute(new String[]{item.getServerId()});
+
+                }
+
+                @Override
+                public void onConnectionFail(String msg) {
+                    if (AppConstant.DEBUG)
+                        Toast.makeText(MovieDetailActivityMobile.this, "onConnectionFail()", Toast.LENGTH_SHORT).show();
+                }
+            }).execute();
 
             //Update Image with Big Image
-        /* Change Width of poster so that it should not look bad*/
-
+            /* Change Width of poster Imagecso that it should not look bad*/
             item.setPoster_path(item.getPoster_path().replace("w185", "w342"));
             Glide.with(this)
-                    .load(item.getPoster_path())
+                    .load(item.getPoster_path()).asBitmap()
+                    .listener(
+                            new RequestListener<String, Bitmap>() {
+                                @Override
+                                public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                    Palette.from(resource).generate(
+                                            new Palette.PaletteAsyncListener() {
+                                                @Override
+                                                public void onGenerated(Palette palette) {
+                                                    int primary = R.color.primary;
+                                                    int colorPrimaryDark = R.color.primary_dark;
+                                                    int extractedColorPrimary = palette.getVibrantColor(primary);
+                                                    int extractedDarkColor = palette.getDarkVibrantColor(colorPrimaryDark);
+
+                                                    collapsingToolbarLayout.setContentScrimColor(extractedColorPrimary);
+                                                    collapsingToolbarLayout.setStatusBarScrimColor(extractedDarkColor);
+                                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                                        getWindow().setStatusBarColor(extractedDarkColor);
+                                                        getWindow().setNavigationBarColor(extractedColorPrimary);
+                                                    }
+                                                }
+                                            }
+
+                                    );
+                                    return false;
+                                }
+                            }
+                    )
                     .centerCrop()
                     .placeholder(MainFragment.drawable)
-                    .crossFade()
                     .into(ivBanner);
         }
 
@@ -233,6 +301,7 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
     }
 
     /*Convert ImageView to Bitmap*/
+
     private Bitmap convertToBitMap(Drawable drawable, int width, int height) {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -257,9 +326,9 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
 
         @Override
         protected List<TrailerItem> doInBackground(String... params) {
-            String moviewId = params[0];
+            String movieId = params[0];
             String path = params[1];
-            String jsonString = new HttpURLConnectionWebService().getTrailerJSON(moviewId);
+            String jsonString = new HttpURLConnectionWebService().getTrailerJSON(movieId);
             if (jsonString != null) {
                 List<TrailerItem> movieItems = JSONParser.parseTrailerList(jsonString, path);
                 return movieItems;
@@ -302,6 +371,10 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
 
     /*Set Trailer of movie*/
     private void setTrailerView(List<TrailerItem> item) {
+
+        /*Initialise with first key of you tube video*/
+        mTrailerId = item.get(0).getKey();
+
         /*Trailer Setup*/
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_trailer);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);

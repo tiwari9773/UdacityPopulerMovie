@@ -102,6 +102,7 @@ public class HttpURLConnectionWebService {
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setConnectTimeout(4000);
             httpURLConnection.connect();
 
             InputStream inputStream = httpURLConnection.getInputStream();

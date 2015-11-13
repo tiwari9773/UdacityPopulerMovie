@@ -59,14 +59,15 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
             mTwoPane = false;
             getSupportActionBar().setElevation(0f);
         }
-
     }
 
     @Override
     public void onItemSelected(MovieItem item, View view) {
         if (mTwoPane) {
-            if (AppConstant.DEBUG)
-                Toast.makeText(MainActivity.this, item.getTitle() + "", Toast.LENGTH_SHORT).show();
+            if (AppConstant.DEBUG_DONE){
+                String title = item==null? "Null Object":item.getTitle();
+                Toast.makeText(MainActivity.this, title, Toast.LENGTH_SHORT).show();
+            }
             Bundle b = new Bundle();
             b.putParcelable(AppConstant.OBJECT, item);
 

@@ -11,6 +11,15 @@ collect your apikey from here <href a>https://www.themoviedb.org/documentation/a
 <br>enter in gradle.properties.
 <br>MyMovieApiKey="YOUR_KEY_HERE"
 
+Concept Used
+------------------------
+1) Content Provider
+<br>2) color palette
+<br>3) SQlite DataCaching
+<br>4) Recycler View
+<br>5) Co-Ordinated Layout
+<br>6) Floating Toolbar
+
 Screenshot
 ------------------------
 ![Screenshot](/screenshot_gif_demo/device-home.png "Sample demo of project")

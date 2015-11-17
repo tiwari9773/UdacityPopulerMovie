@@ -16,12 +16,15 @@ public class RecycleMarginDecoration extends RecyclerView.ItemDecoration {
     private int margin;
 
     public RecycleMarginDecoration(Context context) {
-        margin = context.getResources().getDimensionPixelSize(R.dimen.padding_four);
+        if (context != null)
+            margin = context.getResources().getDimensionPixelSize(R.dimen.padding_four);
+        else
+            margin = 6;
     }
 
     @Override
     public void getItemOffsets(
             Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        outRect.set(margin, margin , margin / 2, 0);
+        outRect.set(margin, margin, margin / 2, 0);
     }
 }

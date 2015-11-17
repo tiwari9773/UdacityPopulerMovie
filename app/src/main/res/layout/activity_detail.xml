@@ -10,14 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/movie_poster_height"
         android:fitsSystemWindows="true"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
-            app:contentScrim="@color/primary"
+            app:contentScrim="?attr/colorPrimary"
             app:expandedTitleMarginEnd="64dp"
             app:expandedTitleMarginStart="48dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
@@ -27,6 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
+                android:fitsSystemWindows="true"
                 android:scaleType="centerCrop"
                 android:src="@mipmap/ic_launcher"
                 android:transitionName="@string/transition_thumbnail_to_poster"
@@ -37,9 +38,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:layout_scrollFlags="scroll|enterAlways"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
@@ -103,10 +102,10 @@
                 app:cardUseCompatPadding="true">
 
                 <LinearLayout
-                    android:padding="@dimen/default_padding"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="@dimen/default_padding">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -147,10 +146,10 @@
                 app:cardUseCompatPadding="true">
 
                 <LinearLayout
-                    android:padding="@dimen/default_padding"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="@dimen/default_padding">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -200,13 +199,13 @@
 
 
             <LinearLayout
-                android:paddingLeft="@dimen/default_padding"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="@dimen/default_padding"
                 android:focusable="false"
                 android:orientation="vertical"
-                android:paddingBottom="@dimen/default_padding">
+                android:paddingBottom="@dimen/default_padding"
+                android:paddingLeft="@dimen/default_padding">
 
                 <TextView
                     android:layout_width="match_parent"

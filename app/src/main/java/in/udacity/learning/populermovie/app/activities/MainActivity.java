@@ -64,8 +64,8 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
     @Override
     public void onItemSelected(MovieItem item, View view) {
         if (mTwoPane) {
-            if (AppConstant.DEBUG_DONE){
-                String title = item==null? "Null Object":item.getTitle();
+            if (AppConstant.DEBUG_DONE) {
+                String title = item == null ? "Null Object" : item.getTitle();
                 Toast.makeText(MainActivity.this, title, Toast.LENGTH_SHORT).show();
             }
             Bundle b = new Bundle();
@@ -90,6 +90,10 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
                 startActivity(in);
             }
         }
+    }
+
+    public boolean ismTwoPane() {
+        return mTwoPane;
     }
 
 }

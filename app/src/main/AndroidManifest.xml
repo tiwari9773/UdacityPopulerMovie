@@ -18,15 +18,16 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".activities.MovieDetailActivityMobile"
-            android:parentActivityName=".activities.MainActivity" />
-
         <provider
             android:name="in.udacity.learning.dbhelper.MovieProvider"
             android:authorities="@string/content_authority"
             android:exported="false"
             android:syncable="true" />
+
+        <activity
+            android:theme="@style/Theme.DesignDemo"
+            android:name=".activities.MovieDetailActivityMobile"
+            android:parentActivityName=".activities.MainActivity"></activity>
     </application>
 
 

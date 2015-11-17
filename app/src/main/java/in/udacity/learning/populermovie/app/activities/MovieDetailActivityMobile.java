@@ -1,4 +1,3 @@
-
 package in.udacity.learning.populermovie.app.activities;
 
 import android.app.ProgressDialog;
@@ -43,6 +42,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import in.udacity.learning.adapter.RecycleMarginDecoration;
 import in.udacity.learning.adapter.TrailerViewAdapter;
 import in.udacity.learning.constant.AppConstant;
@@ -83,6 +84,11 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
     /*For dynamic Color Change*/
     private CollapsingToolbarLayout collapsingToolbarLayout;
 
+    @Bind(R.id.tv_original_title) TextView tvTitle;
+    @Bind(R.id.tv_overview)TextView tvOverview;
+    @Bind(R.id.tv_language)TextView tvLanguage;
+    @Bind(R.id.tv_release_date)TextView tvReleaseDate;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +96,7 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
         /*Problem: In this page UI gets little bit scrolled automatically and overview hide
         * How to find problem and solve*/
         setContentView(R.layout.activity_detail);
+        ButterKnife.bind(this);
 
         initialise(savedInstanceState);
     }
@@ -139,19 +146,12 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
            /*Setup title of Image*/
             setTitle(item.getTitle());
 
-            final ImageView ivBanner = (ImageView) findViewById(R.id.iv_movie_poster);
-
-            TextView tvTitle = (TextView) findViewById(R.id.tv_original_title);
             tvTitle.setText(item.getTitle());
-
-            TextView tvOverview = (TextView) findViewById(R.id.tv_overview);
             tvOverview.setText(item.getOverview());
-
-            TextView tvLanguage = (TextView) findViewById(R.id.tv_language);
             tvLanguage.setText(item.getOriginal_language());
-
-            TextView tvReleaseDate = (TextView) findViewById(R.id.tv_release_date);
             tvReleaseDate.setText(item.getRelease_date());
+
+            final ImageView ivBanner = (ImageView) findViewById(R.id.iv_movie_poster);
 
         /*Set Rating bar out of Five*/
             RatingBar ratingBar = (RatingBar) findViewById(R.id.rb_ratingbar);
@@ -190,7 +190,6 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
                             /*Change Icon also */
                         fab.setImageDrawable(getResources().getDrawable(R.mipmap.ic_favorite_border_black_18dp));
 
-
                     } else {
                         try {
                              /*Change Icon also */
@@ -205,7 +204,7 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
                             File file = getFileStreamPath(item.getServerId() + ".jpg");
                             String localPath = file.getAbsolutePath();
 
-                            item.setPoster_path(localPath);
+                           item.setPoster_path(localPath);
 
                             /*House Keeping Operation*/
                             fileOutputStream.flush();
@@ -229,14 +228,16 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
                         cv.put(MovieContract.FavouriteMovie.COL_VOTE_COUNT, item.getVote_count());
 
                         Uri uri = getContentResolver().insert(MovieContract.FavouriteMovie.CONTENT_URI, cv);
-                        Log.d(TAG, "onClick " + uri.toString() + " Values " + cv.toString());
+
+                        if (AppConstant.DEBUG)
+                            Log.d(TAG, "onClick " + uri.toString() + " Values " + cv.toString());
                     }
                 }
 
             });
 
           /* Check Trailer Values and link from server*/
-            new CheckNetworkConnection(this,false, new CheckNetworkConnection.OnConnectionCallback() {
+            new CheckNetworkConnection(this, false, new CheckNetworkConnection.OnConnectionCallback() {
 
                 @Override
                 public void onConnectionSuccess() {
@@ -273,15 +274,15 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
                                             new Palette.PaletteAsyncListener() {
                                                 @Override
                                                 public void onGenerated(Palette palette) {
-                                                    int primary = R.color.primary;
-                                                    int colorPrimaryDark = R.color.primary_dark;
+                                                    int primary = R.color.red;
+                                                    int colorPrimaryDark = R.color.red;
                                                     int extractedColorPrimary = palette.getVibrantColor(primary);
                                                     int extractedDarkColor = palette.getDarkVibrantColor(colorPrimaryDark);
 
                                                     collapsingToolbarLayout.setContentScrimColor(extractedColorPrimary);
                                                     collapsingToolbarLayout.setStatusBarScrimColor(extractedDarkColor);
                                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                                        getWindow().setStatusBarColor(extractedDarkColor);
+                                                        //getWindow().setStatusBarColor(extractedDarkColor);
                                                         getWindow().setNavigationBarColor(extractedColorPrimary);
                                                     }
                                                 }

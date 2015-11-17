@@ -9,13 +9,16 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,6 +42,7 @@ import in.udacity.learning.listener.RecycleEndlessScrollListener;
 import in.udacity.learning.logger.L;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.populermovie.app.R;
+import in.udacity.learning.populermovie.app.activities.MainActivity;
 import in.udacity.learning.web_service.HttpURLConnectionWebService;
 import in.udacity.learning.web_service.JSONParser;
 
@@ -190,8 +194,9 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                 /*If new Order to sort then it is acceptable to call webservice*/
                 sort_order = sort_populer;
 
-                /*Clear OtherPanel*/
-                referenceForCallback.onItemSelected(null, null);
+               /*Clear OtherPanel if it is in tablet mode*/
+                if (((MainActivity) getActivity()).ismTwoPane())
+                    referenceForCallback.onItemSelected(null, null);
 
                 /*Now list is new and completely refresh, so application make first one as Selected*/
                 isFirstSelected = false;
@@ -207,8 +212,9 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Rated Movie");
                 sort_order = sort_rating;
 
-                 /*Clear OtherPanel*/
-                referenceForCallback.onItemSelected(null,null);
+                 /*Clear OtherPanel if it is in tablet mode*/
+                if (((MainActivity) getActivity()).ismTwoPane())
+                    referenceForCallback.onItemSelected(null, null);
 
                 /*Now list is new and completely refresh, so application make firstone as Selected*/
                 isFirstSelected = false;
@@ -223,8 +229,9 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
 
                 sort_order = sort_favourite;
 
-                 /*Clear OtherPanel*/
-                referenceForCallback.onItemSelected(null,null);
+                /*Clear OtherPanel if it is in tablet mode*/
+                if (((MainActivity) getActivity()).ismTwoPane())
+                    referenceForCallback.onItemSelected(null, null);
 
                 /*Now list is new and completely refresh, so application make firstone as Selected*/
                 isFirstSelected = false;

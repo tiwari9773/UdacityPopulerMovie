@@ -12,6 +12,6 @@
     <style name="Theme.DesignDemo" parent="AppTheme">
     </style>
 
-    <style name="my_progress" parent="android:Widget.ProgressBar"></style>
+    <style name="my_progress" parent="android:Widget.Holo.ProgressBar"></style>
 
 </resources>

@@ -319,12 +319,8 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
         @Override
         protected List<ReviewItem> doInBackground(String... params) {
             String moviewId = params[0];
-            String jsonString = new HttpURLConnectionWebService().getReviewJSON(moviewId);
-            if (jsonString != null) {
-                List<ReviewItem> movieItems = JSONParser.parseReviewList(jsonString);
-                return movieItems;
-            } else
-                return null;
+            List<ReviewItem> movieItems = new HttpURLConnectionWebService().getListReviewJSON(moviewId);
+            return movieItems;
         }
 
         @Override

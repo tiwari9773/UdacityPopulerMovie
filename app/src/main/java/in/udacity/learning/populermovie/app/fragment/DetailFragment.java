@@ -375,7 +375,7 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
 
         switch (item.getItemId()) {
             case R.id.action_share:
-                createShareForecastIntent();
+                startActivity(createShareForecastIntent());
         }
 
         if (AppConstant.DEBUG_DONE)

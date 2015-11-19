@@ -3,17 +3,25 @@ package in.udacity.learning.web_service;
 import android.net.Uri;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.keys.ApiKeys;
 import in.udacity.learning.logger.L;
+import in.udacity.learning.model.ReviewItem;
 import in.udacity.learning.populermovie.app.BuildConfig;
 import in.udacity.learning.populermovie.app.activities.MyApplication;
 
@@ -126,6 +134,74 @@ public class HttpURLConnectionWebService {
                 inputStream.close();
 
             return stringBuffer.toString();
+        } catch (MalformedURLException e) {
+            if (AppConstant.DEBUG)
+                L.lToast(MyApplication.getInstance().getContext(), e.toString());
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (httpURLConnection != null)
+                httpURLConnection.disconnect();
+
+            if (bufferedReader != null)
+                try {
+                    bufferedReader.close();
+                } catch (final Exception e) {
+                    L.lToast(MyApplication.getInstance().getContext(), e.toString());
+                }
+        }
+        return null;
+    }
+
+    /*Special For Gson Experiment*/
+     /* Tag is only for marking which class is calling this method*/
+    public List<ReviewItem> getListReviewJSON(String movieId) {
+        try {
+
+            Uri builtUri = Uri.parse(WebServiceURL.baseURLTrailer).buildUpon().appendPath(movieId).appendPath("reviews")
+                    .appendQueryParameter(WebServiceURL.API_KEY, BuildConfig.OPEN_MOVIE_API_KEY)
+                    .build();
+            URL url = new URL(builtUri.toString());
+
+            String json = getJSONString(url);
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<ReviewItem>>() {
+            }.getType();
+            //List<ReviewItem> posts = (List<ReviewItem>) gson.fromJson(json, ReviewItem.class);
+            ReviewItem temp = gson.fromJson(json, ReviewItem.class);
+
+            List<ReviewItem> posts = new ArrayList<>();
+            posts.add(temp);
+            return posts;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private InputStream getJSONSInputStream(URL url) {
+        HttpURLConnection httpURLConnection = null;
+        BufferedReader bufferedReader = null;
+         /* Take an URL Object*/
+        try {
+
+                /* */
+            if (AppConstant.DEVELOPER)
+                Log.v(TAG, url.toString());
+
+            httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setConnectTimeout(4000);
+            httpURLConnection.connect();
+
+            if (httpURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                InputStream inputStream = httpURLConnection.getInputStream();
+                return inputStream;
+            } else {
+                return null;
+            }
+
         } catch (MalformedURLException e) {
             if (AppConstant.DEBUG)
                 L.lToast(MyApplication.getInstance().getContext(), e.toString());

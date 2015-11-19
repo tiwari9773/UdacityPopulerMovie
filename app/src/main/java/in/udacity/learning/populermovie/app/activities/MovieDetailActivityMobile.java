@@ -50,6 +50,7 @@ import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.dbhelper.MovieContract;
 import in.udacity.learning.listener.OnTrailerClickListener;
 import in.udacity.learning.model.ReviewItem;
+import in.udacity.learning.model.ReviewResult;
 import in.udacity.learning.model.TrailerItem;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.network.CheckNetworkConnection;
@@ -84,10 +85,14 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
     /*For dynamic Color Change*/
     private CollapsingToolbarLayout collapsingToolbarLayout;
 
-    @Bind(R.id.tv_original_title) TextView tvTitle;
-    @Bind(R.id.tv_overview)TextView tvOverview;
-    @Bind(R.id.tv_language)TextView tvLanguage;
-    @Bind(R.id.tv_release_date)TextView tvReleaseDate;
+    @Bind(R.id.tv_original_title)
+    TextView tvTitle;
+    @Bind(R.id.tv_overview)
+    TextView tvOverview;
+    @Bind(R.id.tv_language)
+    TextView tvLanguage;
+    @Bind(R.id.tv_release_date)
+    TextView tvReleaseDate;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -204,7 +209,7 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
                             File file = getFileStreamPath(item.getServerId() + ".jpg");
                             String localPath = file.getAbsolutePath();
 
-                           item.setPoster_path(localPath);
+                            item.setPoster_path(localPath);
 
                             /*House Keeping Operation*/
                             fileOutputStream.flush();
@@ -352,12 +357,8 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
         @Override
         protected List<ReviewItem> doInBackground(String... params) {
             String moviewId = params[0];
-            String jsonString = new HttpURLConnectionWebService().getReviewJSON(moviewId);
-            if (jsonString != null) {
-                List<ReviewItem> movieItems = JSONParser.parseReviewList(jsonString);
-                return movieItems;
-            } else
-                return null;
+            List<ReviewItem> movieItems = new HttpURLConnectionWebService().getListReviewJSON(moviewId);
+            return movieItems;
         }
 
         @Override
@@ -389,17 +390,13 @@ public class MovieDetailActivityMobile extends AppCompatActivity implements OnTr
 
     /* Review of Author*/
     private void setReview(List<ReviewItem> item) {
+        List<ReviewResult> it = item.get(0).getResults();
+
         TextView author = (TextView) findViewById(R.id.tv_author);
         TextView content = (TextView) findViewById(R.id.tv_content);
-        author.setText(item.get(0).getAuthor());
-        content.setText(item.get(0).getUri());
-    }
-
-    // Dialog Progress
-    private void progressLoading() {
-        dialog = new ProgressDialog(this, android.R.style.Theme_DeviceDefault_Dialog_NoActionBar);
-        dialog.setIndeterminate(true);
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.show();
+        if (it.size() > 0) {
+            author.setText(it.get(0).getAuthor());
+            content.setText(it.get(0).getUri());
+        }
     }
 }

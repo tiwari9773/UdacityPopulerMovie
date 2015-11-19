@@ -1,14 +1,10 @@
 package in.udacity.learning.populermovie.app.activities;
 
 import android.app.ActivityOptions;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -16,8 +12,8 @@ import android.widget.Toast;
 
 import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.model.MovieItem;
-import in.udacity.learning.populermovie.app.fragment.DetailFragment;
 import in.udacity.learning.populermovie.app.R;
+import in.udacity.learning.populermovie.app.fragment.DetailFragment;
 import in.udacity.learning.populermovie.app.fragment.MainFragment;
 
 public class MainActivity extends AppCompatActivity implements MainFragment.Callback {
@@ -30,12 +26,17 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
 
     private static final String DETAIL_FRAGMENT_TAG = "DFTAG";
 
+    /*For back button click,If user is clicking by mistake app should not close*/
+    private Handler handler;
+    private boolean doubleBackToExitPressedOnce = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         initialize(savedInstanceState);
+        handler = new Handler();
     }
 
     public void initialize(Bundle savedInstanceState) {
@@ -96,4 +97,22 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
         return mTwoPane;
     }
 
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
+    }
 }

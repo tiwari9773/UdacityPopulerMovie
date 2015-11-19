@@ -44,6 +44,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import in.udacity.learning.adapter.RecycleMarginDecoration;
 import in.udacity.learning.adapter.TrailerViewAdapter;
+import in.udacity.learning.model.ReviewResult;
 import in.udacity.learning.network.CheckNetworkConnection;
 import in.udacity.learning.constant.AppConstant;
 import in.udacity.learning.dbhelper.MovieContract;
@@ -358,12 +359,15 @@ public class DetailFragment extends Fragment implements OnTrailerClickListener {
 
     /* Review of Author*/
     private void setReview(List<ReviewItem> item) {
+        List<ReviewResult> it = item.get(0).getResults();
+
         TextView author = (TextView) view.findViewById(R.id.tv_author);
         TextView content = (TextView) view.findViewById(R.id.tv_content);
-        author.setText(item.get(0).getAuthor());
-        content.setText(item.get(0).getUri());
+        if (it.size() > 0) {
+            author.setText(it.get(0).getAuthor());
+            content.setText(it.get(0).getUri());
+        }
     }
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_detail, menu);

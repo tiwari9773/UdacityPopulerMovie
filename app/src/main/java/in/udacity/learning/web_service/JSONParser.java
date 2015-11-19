@@ -14,6 +14,7 @@ import java.util.List;
 import in.udacity.learning.dbhelper.MovieContract;
 import in.udacity.learning.model.MovieItem;
 import in.udacity.learning.model.ReviewItem;
+import in.udacity.learning.model.ReviewResult;
 import in.udacity.learning.model.TrailerItem;
 
 /**
@@ -105,6 +106,7 @@ public class JSONParser {
         List<ReviewItem> lsObj = new ArrayList();
 
         try {
+            List<ReviewResult> ls = new ArrayList();
             JSONObject jsonObject = new JSONObject(jSonString);
             JSONArray jsonArray = jsonObject.getJSONArray(WebServiceParsingKeys.ReviewKeys.RESULTS);
 
@@ -116,9 +118,13 @@ public class JSONParser {
                 String content = origArray.getString(WebServiceParsingKeys.ReviewKeys.CONTENT);
                 String url = origArray.getString(WebServiceParsingKeys.ReviewKeys.URI);
 
-                ReviewItem temp = new ReviewItem(id, author, content);
+                ReviewResult temp = new ReviewResult(id, author, content);
                 temp.setUri(url);
-                lsObj.add(temp);
+                ls.add(temp);
+            }
+            if (ls != null && ls.size() > 0) {
+                ReviewItem it = new ReviewItem();
+                it.setResults(ls);
             }
 
         } catch (JSONException e) {

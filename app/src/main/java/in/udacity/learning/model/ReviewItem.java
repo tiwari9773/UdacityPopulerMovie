@@ -1,28 +1,35 @@
 package in.udacity.learning.model;
 
+import java.util.List;
+
 /**
  * Created by Lokesh on 01-11-2015.
  */
-public class ReviewItem implements MarkerItem{
+public class ReviewItem {
 
-    String id = "test";
-    String author = "test";
-    String content = "test";
-    String uri = "";
+    String id;
+    int page = 1;
+    int total_pages = 1;
+    int total_results = 3;
 
-    public String getUri() {
-        return uri;
+    List<ReviewResult> results = null;
+
+    public int getTotal_pages() {
+        return total_pages;
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
+    public void setTotal_pages(int total_pages) {
+        this.total_pages = total_pages;
     }
 
-    public ReviewItem(String id, String author, String content) {
-        this.id = id;
-        this.author = author;
-        this.content = content;
+    public int getTotal_results() {
+        return total_results;
     }
+
+    public void setTotal_results(int total_results) {
+        this.total_results = total_results;
+    }
+
 
     public String getId() {
         return id;
@@ -32,19 +39,19 @@ public class ReviewItem implements MarkerItem{
         this.id = id;
     }
 
-    public String getContent() {
-        return content;
+    public int getPage() {
+        return page;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setPage(int page) {
+        this.page = page;
     }
 
-    public String getAuthor() {
-        return author;
+    public List<ReviewResult> getResults() {
+        return results;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
+    public void setResults(List<ReviewResult> results) {
+        this.results = results;
     }
 }

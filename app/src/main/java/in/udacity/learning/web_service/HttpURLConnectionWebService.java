@@ -121,11 +121,15 @@ public class HttpURLConnectionWebService {
             if (stringBuffer.length() == 0) {
                 return null;
             }
+            /*Close Input Stream*/
+            if (inputStream != null)
+                inputStream.close();
 
             return stringBuffer.toString();
         } catch (MalformedURLException e) {
-            L.lToast(MyApplication.getInstance().getContext(), e.toString());
-            //e.printStackTrace();
+            if (AppConstant.DEBUG)
+                L.lToast(MyApplication.getInstance().getContext(), e.toString());
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

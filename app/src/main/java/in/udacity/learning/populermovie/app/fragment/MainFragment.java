@@ -11,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -53,7 +54,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
     private String TAG = getClass().getName();
 
     private MovieViewAdapter movieViewAdapter;
-    private List<MovieItem> mItems = new ArrayList<>();
+    private ArrayList<MovieItem> mItems = new ArrayList<>();
 
     /* Option available for sorting */
     private String sort_populer = "popularity.desc";
@@ -82,6 +83,9 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
 
     /*Make first item selected first time*/
     private boolean isFirstSelected = false;
+
+    /*Position on Which Movie User selected if Any*/
+    private int userSelectedMovie = 0;
 
     /**
      * A callback interface that all activities containing this fragment must
@@ -112,9 +116,34 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-        initialise(view);
+        /*Restore Previous Object of available*/
+        if (savedInstanceState != null) {
+            regainOldView(savedInstanceState);
+        }
 
+        initialise(view);
         return view;
+    }
+
+    /*Special when device rotates*/
+    private void regainOldView(Bundle savedInstanceState) {
+        mItems = savedInstanceState.getParcelableArrayList(AppConstant.OBJECT);
+        sort_order = savedInstanceState.getString(AppConstant.OUT_EXTRA1);
+        userSelectedMovie = savedInstanceState.getInt(AppConstant.OUT_EXTRA2);
+
+
+        if (((MainActivity) getActivity()).ismTwoPane() && mItems != null && mItems.size() > 0) {
+            referenceForCallback.onItemSelected(mItems.get(userSelectedMovie), null);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(AppConstant.OBJECT, mItems);
+        outState.putString(AppConstant.OUT_EXTRA1, sort_order);
+        outState.putInt(AppConstant.OUT_EXTRA2, userSelectedMovie);
+
+        super.onSaveInstanceState(outState);
     }
 
     private void initialise(View view) {
@@ -168,6 +197,10 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
 
         /*On Scroll Listener*/
         recycleView.addOnScrollListener(recycleEndlessScrollListener);
+
+        /*Adjust Scroll at Appropriate Position, Proper use case when device restore values
+        * when user rotate device*/
+        recycleView.scrollToPosition(userSelectedMovie);
     }
 
     @Override
@@ -348,6 +381,9 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
 
         ImageView img = (ImageView) view;
         drawable = img.getDrawable();
+        /*Store Position if device is getting rotated */
+        userSelectedMovie = position;
+
         referenceForCallback.onItemSelected(mItems.get(position), view);
     }
 
@@ -399,7 +435,7 @@ public class MainFragment extends Fragment implements OnMovieItemClickListener {
             if (!isFirstSelected && mItems != null && mItems.size() > 0 && mItems.get(0) != null) {
                 isFirstSelected = true;
                 Intent in = new Intent(AppConstant.FILTER_OBJECT);
-                in.putExtra(AppConstant.OBJECT, mItems.get(0));
+                in.putExtra(AppConstant.OBJECT, mItems.get(userSelectedMovie));
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(in);
 
                 if (AppConstant.DEBUG_DONE)

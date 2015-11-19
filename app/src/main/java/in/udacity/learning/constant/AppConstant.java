@@ -19,4 +19,10 @@ public class AppConstant {
 
     public static final String OBJECT = "obj";
     public static final String FILTER_OBJECT = "intent_filter";
+
+    public static final String OUT_STATE = "state";
+    public static final String OUT_EXTRA1 = "state2";
+    public static final String OUT_EXTRA2 = "state3";
+    public static final String OUT_EXTRA3 = "state4";
+
 }
